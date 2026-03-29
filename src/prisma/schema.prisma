@@ -1,0 +1,582 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+    OWNER
+    EDITOR
+    VIEWER
+}
+
+enum SubscriptionStatus {
+    TRIAL
+    ACTIVE
+    INACTIVE
+    CANCELLED
+}
+
+enum PlanType {
+    SOLO
+    TEAM
+}
+
+enum BillingInterval {
+    MONTHLY
+    YEARLY
+}
+
+enum BillingInvoiceStatus {
+    PENDING
+    ISSUED
+    PAID
+    OVERDUE
+    VOID
+}
+
+enum DomainStatus {
+    PENDING
+    VERIFIED
+    ACTIVE
+    FAILED
+}
+
+enum WhatsAppAccountStatus {
+    PENDING
+    VERIFIED
+    ACTIVE
+    DISCONNECTED
+    FAILED
+}
+
+enum IntegrationProvider {
+    WHATSAPP
+    EMAIL
+    RAZORPAY
+}
+
+enum IntegrationStatus {
+    CONNECTED
+    DISCONNECTED
+    DEGRADED
+}
+
+enum StudentCourseStatus {
+    ACTIVE
+    COMPLETED
+    DROPPED
+}
+
+enum AttendanceStatus {
+    PRESENT
+    ABSENT
+}
+
+model User {
+    id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+    email               String    @unique
+    passwordHash        String?
+    name                String?
+    trialStartAt        DateTime?
+    trialEndsAt         DateTime?
+    trialStatus         String?
+    onboardingCompleted Boolean   @default(false)
+    firstLogin          Boolean   @default(true)
+    role                UserRole  @default(OWNER)
+    instituteId         String?   @db.ObjectId
+    subject             String?
+    bio                 String?
+    emailVerified       Boolean   @default(false)
+    otpHash             String?
+    otpResendCount      Int       @default(0)
+    otpAttempts         Int       @default(0)
+    lastOtpSentAt       DateTime?
+    otpExpiresAt        DateTime?
+    otpPending          Boolean   @default(false)
+    tokenVersion        Int       @default(0)
+    deletedAt           DateTime?
+    createdAt           DateTime  @default(now())
+    updatedAt           DateTime  @updatedAt
+
+    @@index([instituteId])
+    @@map("users")
+}
+
+model ShortLink {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    slug        String   @unique
+    originalUrl String
+    clickCount  Int      @default(0)
+    createdAt   DateTime @default(now())
+
+    @@index([createdAt])
+    @@map("shortlinks")
+}
+
+model Institute {
+    id                     String       @id @default(auto()) @map("_id") @db.ObjectId
+    name                   String?
+    description            String?
+    phone                  String?
+    whatsapp               String?
+    address                Address?
+    timings                String?
+    leadWhatsappEnabled    Boolean      @default(false)
+    autoReplyEnabled       Boolean      @default(false)
+    logo                   String?
+    logoUrl                String?
+    faviconUrl             String?
+    primaryColor           String?
+    banner                 String?
+    heroImage              String?
+    googleMapLink          String?
+    websiteUrl             String?
+    instagramUrl           String?
+    facebookUrl            String?
+    youtubeUrl             String?
+    linkedinUrl            String?
+    isOnboarded            Boolean      @default(false)
+    whatsappOnboardingSent Boolean      @default(false)
+    slug                   String?      @unique
+    customDomain           String?      @unique
+    domainVerified         Boolean      @default(false)
+    domainStatus           DomainStatus @default(PENDING)
+    deletedAt              DateTime?
+    createdAt              DateTime     @default(now())
+    updatedAt              DateTime     @updatedAt
+
+    @@index([phone])
+    @@map("institutes")
+}
+
+model InstituteDomain {
+    id          String       @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String       @db.ObjectId
+    host        String       @unique
+    surface     String       @default("portal")
+    status      DomainStatus @default(PENDING)
+    verifiedAt  DateTime?
+    active      Boolean      @default(false)
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+
+    @@index([instituteId])
+    @@index([status])
+    @@map("institute_domains")
+}
+
+model WhatsAppAccount {
+    id                String                @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId       String                @unique @db.ObjectId
+    phoneNumber       String
+    phoneNumberId     String?
+    businessAccountId String?
+    status            WhatsAppAccountStatus @default(PENDING)
+    connectedAt       DateTime?
+    updatedAt         DateTime              @updatedAt
+
+    @@index([status])
+    @@map("whatsapp_accounts")
+}
+
+model InstituteNotificationPreference {
+    id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId        String   @unique @db.ObjectId
+    newEnquiryAlert    Boolean  @default(true)
+    followUpReminder   Boolean  @default(true)
+    leadAssigned       Boolean  @default(true)
+    paymentReceived    Boolean  @default(true)
+    admissionConfirmed Boolean  @default(true)
+    updatedAt          DateTime @updatedAt
+
+    @@map("institute_notification_preferences")
+}
+
+model WhatsAppMessage {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String?  @db.ObjectId
+    phone       String
+    message     String
+    direction   String
+    status      String
+    provider    String   @default("META_WHATSAPP_CLOUD")
+    providerId  String?
+    payload     Json?
+    error       String?
+    createdAt   DateTime @default(now())
+
+    @@index([instituteId])
+    @@index([phone])
+    @@index([status])
+    @@map("whatsapp_messages")
+}
+
+type Address {
+    addressLine1 String?
+    addressLine2 String?
+    city         String?
+    state        String?
+    region       String?
+    postalCode   String?
+    country      String?
+    countryCode  String?
+}
+
+model Subscription {
+    id                   String             @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId          String             @unique @db.ObjectId
+    razorpaySubId        String?
+    planType             PlanType           @default(SOLO)
+    billingInterval      BillingInterval    @default(MONTHLY)
+    userLimit            Int                @default(1)
+    trialEndsAt          DateTime?
+    status               SubscriptionStatus @default(TRIAL)
+    currentPeriodEnd     DateTime?
+    lastChargedAt        DateTime?
+    autopayEnabled       Boolean            @default(false)
+    paymentMethodAddedAt DateTime?
+    deletedAt            DateTime?
+    createdAt            DateTime           @default(now())
+    updatedAt            DateTime           @updatedAt
+
+    @@index([status])
+    @@map("subscriptions")
+}
+
+type LeadActivity {
+    activityType String
+    title        String
+    description  String?
+    actorUserId  String?
+    createdAt    DateTime
+}
+
+model Lead {
+    id          String         @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String         @db.ObjectId
+    name        String
+    phone       String
+    email       String?
+    source      String?
+    course      String?
+    message     String?
+    followUpAt  DateTime?
+    status      String         @default("NEW")
+    createdBy   String?        @db.ObjectId
+    deletedAt   DateTime?
+    activities  LeadActivity[]
+    createdAt   DateTime       @default(now())
+    updatedAt   DateTime       @updatedAt
+
+    @@unique([instituteId, phone])
+    @@index([instituteId])
+    @@map("leads")
+}
+
+model Course {
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String    @db.ObjectId
+    name        String
+    slug        String?
+    banner      String?
+    duration    String?
+    defaultFees Float?
+    description String?
+    createdBy   String?   @db.ObjectId
+    deletedAt   DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([instituteId])
+    @@map("courses")
+}
+
+model Batch {
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String    @db.ObjectId
+    courseId    String    @db.ObjectId
+    name        String
+    slug        String?
+    startDate   DateTime?
+    schedule    String?
+    teacherId   String?   @db.ObjectId
+    createdBy   String?   @db.ObjectId
+    deletedAt   DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([instituteId])
+    @@index([courseId])
+    @@map("batches")
+}
+
+model Student {
+    id                 String    @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId        String    @db.ObjectId
+    name               String
+    phone              String
+    email              String?
+    courseId           String?   @db.ObjectId
+    batchId            String?   @db.ObjectId
+    createdBy          String?   @db.ObjectId
+    portalUsername     String?
+    portalEmail        String?
+    portalPasswordHash String?
+    portalActive       Boolean   @default(true)
+    admissionDate      DateTime  @default(now())
+    deletedAt          DateTime?
+    createdAt          DateTime  @default(now())
+    updatedAt          DateTime  @updatedAt
+
+    @@unique([instituteId, phone])
+    @@index([instituteId])
+    @@map("students")
+}
+
+model StudentCourse {
+    id          String              @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String              @db.ObjectId
+    studentId   String              @db.ObjectId
+    courseId    String              @db.ObjectId
+    batchId     String?             @db.ObjectId
+    joinedAt    DateTime            @default(now())
+    status      StudentCourseStatus @default(ACTIVE)
+    createdBy   String?             @db.ObjectId
+    deletedAt   DateTime?
+    createdAt   DateTime            @default(now())
+    updatedAt   DateTime            @updatedAt
+
+    @@index([instituteId])
+    @@index([studentId])
+    @@index([courseId])
+    @@index([batchId])
+    @@map("student_courses")
+}
+
+model Note {
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String    @db.ObjectId
+    title       String
+    description String?
+    fileUrl     String?
+    courseId    String?   @db.ObjectId
+    batchId     String?   @db.ObjectId
+    createdBy   String?   @db.ObjectId
+    deletedAt   DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([instituteId])
+    @@index([courseId])
+    @@index([batchId])
+    @@map("notes")
+}
+
+model Attendance {
+    id          String           @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String           @db.ObjectId
+    studentId   String           @db.ObjectId
+    batchId     String?          @db.ObjectId
+    courseId    String?          @db.ObjectId
+    date        DateTime
+    status      AttendanceStatus
+    markedBy    String?          @db.ObjectId
+    deletedAt   DateTime?
+    createdAt   DateTime         @default(now())
+    updatedAt   DateTime         @updatedAt
+
+    @@index([instituteId])
+    @@index([studentId])
+    @@index([courseId])
+    @@index([batchId])
+    @@index([date])
+    @@map("attendance")
+}
+
+model FeePlan {
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    studentId   String    @db.ObjectId
+    instituteId String    @db.ObjectId
+    totalAmount Float
+    dueDate     DateTime?
+    createdBy   String?   @db.ObjectId
+    deletedAt   DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([studentId])
+    @@map("feeplans")
+}
+
+model FeeInstallment {
+    id          String            @id @default(auto()) @map("_id") @db.ObjectId
+    feePlanId   String            @db.ObjectId
+    instituteId String            @db.ObjectId
+    amount      Float
+    paidOn      DateTime?
+    note        String?
+    status      InstallmentStatus
+    createdBy   String?           @db.ObjectId
+    deletedAt   DateTime?
+    createdAt   DateTime          @default(now())
+    updatedAt   DateTime          @updatedAt
+
+    @@index([feePlanId])
+    @@map("feeinstallments")
+}
+
+model Payment {
+    id          String    @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String    @db.ObjectId
+    studentId   String    @db.ObjectId
+    amount      Float
+    method      String?
+    reference   String?
+    createdBy   String?   @db.ObjectId
+    paidOn      DateTime  @default(now())
+    deletedAt   DateTime?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    @@index([studentId])
+    @@index([instituteId])
+    @@map("payments")
+}
+
+model StudentAnnouncement {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String   @db.ObjectId
+    batchId     String?  @db.ObjectId
+    title       String
+    body        String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([instituteId])
+    @@map("studentannouncements")
+}
+
+enum InstallmentStatus {
+    PENDING
+    PAID
+    OVERDUE
+}
+
+model WhatsAppUsage {
+    id                String   @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId       String   @db.ObjectId
+    phoneNumber       String
+    conversationStart DateTime
+    conversationEnd   DateTime
+    createdAt         DateTime @default(now())
+
+    @@index([instituteId])
+    @@index([phoneNumber])
+    @@index([conversationStart])
+    @@map("whatsapp_usage")
+}
+
+model MonthlyUsage {
+    id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId            String   @db.ObjectId
+    month                  Int
+    year                   Int
+    conversationCount      Int      @default(0)
+    dailyConversationCount Int      @default(0)
+    updatedAt              DateTime @updatedAt
+
+    @@unique([instituteId, month, year])
+    @@index([instituteId])
+    @@map("monthly_usage")
+}
+
+model BillingInvoice {
+    id                    String               @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId           String               @db.ObjectId
+    month                 Int
+    year                  Int
+    periodStart           DateTime
+    periodEnd             DateTime
+    planCode              String
+    billingInterval       BillingInterval
+    planCharge            Float                @default(0)
+    includedAlerts        Int                  @default(0)
+    alertsUsed            Int                  @default(0)
+    extraAlerts           Int                  @default(0)
+    extraAlertRate        Float                @default(0)
+    usageCharge           Float                @default(0)
+    totalAmount           Float                @default(0)
+    currency              String               @default("INR")
+    status                BillingInvoiceStatus @default(PENDING)
+    issuedAt              DateTime?
+    dueDate               DateTime?
+    paidAt                DateTime?
+    razorpayPaymentLinkId String?
+    paymentLinkUrl        String?
+    downloadUrl           String?
+    autopayEnabled        Boolean              @default(false)
+    paymentAttempts       Int                  @default(0)
+    lastAttemptAt         DateTime?
+    nextRetryAt           DateTime?
+    lastFailureReason     String?
+    metadata              Json?
+    createdAt             DateTime             @default(now())
+    updatedAt             DateTime             @updatedAt
+
+    @@unique([instituteId, month, year])
+    @@index([instituteId, status])
+    @@index([dueDate])
+    @@map("billing_invoices")
+}
+
+model AdminNotification {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String   @db.ObjectId
+    eventType   String
+    title       String
+    message     String
+    link        String?
+    read        Boolean  @default(false)
+    metadata    Json?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([instituteId, createdAt])
+    @@index([instituteId, read])
+    @@map("admin_notifications")
+}
+
+model StudentNotification {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    studentId String   @db.ObjectId
+    eventType String
+    title     String
+    message   String
+    link      String?
+    read      Boolean  @default(false)
+    metadata  Json?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([studentId, createdAt])
+    @@index([studentId, read])
+    @@map("student_notifications")
+}
+
+model Integration {
+    id          String              @id @default(auto()) @map("_id") @db.ObjectId
+    instituteId String              @db.ObjectId
+    provider    IntegrationProvider
+    status      IntegrationStatus
+    config      Json?
+    createdAt   DateTime            @default(now())
+    updatedAt   DateTime            @updatedAt
+
+    @@unique([instituteId, provider])
+    @@index([instituteId])
+    @@map("integrations")
+}

@@ -1,0 +1,31 @@
+section,case_id,priority,test_type,module,scenario,preconditions,steps,expected_result,status
+unit,UT-AUTH-SVC-001,P0,unit,auth.service,requestOtp success,valid email and ip,call requestOtp,returns expiresAt and otp persisted,NOT_RUN
+unit,UT-AUTH-SVC-002,P0,unit,auth.service,requestOtp invalid email,invalid email,call requestOtp,throws INVALID_EMAIL,NOT_RUN
+unit,UT-SUB-SVC-006,P0,unit,subscription.service,trial bootstrap,no existing subscription,call getSubscription,trial created SOLO+limit1,NOT_RUN
+unit,UT-SUB-SVC-007,P0,unit,subscription.service,trial expiry,past trialEndsAt,status sync call,status becomes INACTIVE,NOT_RUN
+unit,UT-TEAM-SVC-004,P0,unit,team.service,solo limit enforcement,solo plan and 1 existing user,add second member,PLAN_USER_LIMIT_REACHED,NOT_RUN
+api,API-AUTH-001,P0,api,auth/request-otp,request otp valid,none,POST request-otp,200 success payload,NOT_RUN
+api,API-AUTH-004,P0,api,auth/verify-otp,verify otp valid,otp issued,POST verify-otp,session cookie set and success,NOT_RUN
+api,API-BILL-002,P0,api,billing,create solo subscription,authorized owner,POST billing action create-subscription SOLO,solo plan subscription created,NOT_RUN
+api,API-BILL-003,P0,api,billing,create team subscription,authorized owner,POST billing action create-subscription TEAM,team plan subscription created,NOT_RUN
+api,API-WEBHOOK-003,P0,api,webhooks/razorpay,subscription activated,valid signature,push event subscription.activated,status ACTIVE persisted,NOT_RUN
+integration,INT-001,P0,integration,auth+onboarding,signup to dashboard,fresh account,signup verify otp complete onboarding,dashboard reachable,NOT_RUN
+integration,INT-002,P0,integration,public lead to crm,public institute page exists,submit lead then check dashboard,lead appears in leads list,NOT_RUN
+integration,INT-003,P0,integration,lead conversion,lead exists,set lead ADMITTED,student created from lead,NOT_RUN
+integration,INT-004,P0,integration,student fee payment flow,student exists,create fee add installment payment,records consistent across modules,NOT_RUN
+integration,INT-006,P0,integration,trial expiry guard,past trialEndsAt,access protected route,redirect to billing,NOT_RUN
+e2e,E2E-001,P0,e2e,auth flow,signup flow live,app running,signup with otp,onboarding shown,NOT_RUN
+e2e,E2E-004,P0,e2e,lead capture,public slug exists,submit lead form,success message and crm visibility,NOT_RUN
+e2e,E2E-010,P0,e2e,billing,solo upgrade from billing,owner logged in,choose solo,subscription created and status shown,NOT_RUN
+e2e,E2E-012,P0,e2e,trial expiry ui,subscription inactive,open billing,trial expired banner shown,NOT_RUN
+seo,SEO-001,P0,seo,robots,robots reachable,app running,open /robots.txt,contains sitemap pointer,NOT_RUN
+seo,SEO-002,P0,seo,sitemap,sitemap reachable,app running,open /sitemap.xml,valid xml returned,NOT_RUN
+seo,SEO-004,P1,seo,dynamic sitemap,new institute onboarded,check sitemap entries,new /i/slug present,NOT_RUN
+security,SEC-001,P0,security,api auth,unauthorized protection,no session,call protected endpoints,401 returned,NOT_RUN
+security,SEC-003,P0,security,tenant isolation,two institutes data present,try mutate other institute object,blocked by scoping,NOT_RUN
+security,SEC-005,P0,security,webhook verification,invalid signature,push webhook event,401 invalid signature,NOT_RUN
+edge,EDGE-001,P1,edge,empty data state,no records,open dashboard/leads/payments,stable empty states,NOT_RUN
+edge,EDGE-004,P1,edge,duplicate slug,existing slug present,attempt create same slug,409 conflict,NOT_RUN
+edge,EDGE-011,P1,edge,csv partial failures,mixed csv rows,upload file,valid rows inserted invalid rows reported,NOT_RUN
+perf,E2E-PERF-001,P1,performance,landing,baseline environment,open landing and measure interactive time,<2s,NOT_RUN
+perf,E2E-PERF-002,P1,performance,dashboard,authenticated owner,open dashboard and wait for key widgets,<2s,NOT_RUN

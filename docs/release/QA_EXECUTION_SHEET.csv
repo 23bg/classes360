@@ -1,0 +1,38 @@
+case_id,priority,module,type,automation,preconditions,steps,expected_result,actual_result,evidence,owner,status
+TC-PUB-001,P1,Public,UI/E2E,"TL|P","App running","Open /","Landing sections render","","","",NOT_RUN
+TC-PUB-010,P0,Pricing,UI/E2E,"TL|P","App running","Open /pricing","Solo ₹499 and Team ₹999 visible","","","",NOT_RUN
+TC-PUB-020,P0,Institute Public,E2E,P,"Valid slug exists","Open /i/{slug}","Institute page renders","","","",NOT_RUN
+TC-PUB-030,P0,Lead Form,API/E2E,"V|P","Valid institute slug","Submit lead payload","Lead saved + success","","","",NOT_RUN
+TC-AUTH-001,P0,Auth,API/E2E,"V|P","Test account available","Request and verify OTP on signup","Session created + redirect onboarding","","","",NOT_RUN
+TC-AUTH-002,P0,Auth,API/E2E,"V|P","Onboarded account exists","Request and verify OTP on login","Dashboard redirect","","","",NOT_RUN
+TC-AUTH-005,P1,Auth,API/E2E,"V|P","Resend limit config set","Trigger resend beyond limit","Limit error returned","","","",NOT_RUN
+TC-ONB-001,P0,Onboarding,E2E,P,"Fresh user session","Complete onboarding","isOnboarded true + slug + dashboard redirect","","","",NOT_RUN
+TC-LEAD-004,P0,Leads,E2E,P,"Public lead submitted","Open dashboard leads","Lead appears in CRM","","","",NOT_RUN
+TC-STU-001,P0,Students,API/E2E,"V|P","Owner session","Create/Edit/Delete student","CRUD works correctly","","","",NOT_RUN
+TC-STU-006,P1,Students CSV,API/E2E,"V|P","Valid CSV prepared","Upload CSV","Valid rows inserted","","","",NOT_RUN
+TC-STU-007,P1,Students CSV,API/E2E,"V|P","Invalid CSV prepared","Upload CSV","Error rows reported","","","",NOT_RUN
+TC-COURSE-001,P1,Courses,API/E2E,"V|P","Owner session","Create/Edit/Delete course","CRUD stable","","","",NOT_RUN
+TC-BATCH-001,P1,Batches,API/E2E,"V|P","Owner session","Create/Edit batch","Batch persists","","","",NOT_RUN
+TC-FEE-001,P0,Fees,API/E2E,"V|P","Student exists","Create fee plan","Plan saved","","","",NOT_RUN
+TC-FEE-002,P0,Fees,API/E2E,"V|P","Fee plan exists","Add payment/installment","Installment + payment consistent","","","",NOT_RUN
+TC-PAY-001,P0,Payments,E2E,P,"Payment exists","Open /payments","Payment visible","","","",NOT_RUN
+TC-PAY-002,P1,Payments,API/E2E,"V|P","Payments exist","Apply method/date filters","Correct filtered rows","","","",NOT_RUN
+TC-TEAM-001,P0,Team,API/E2E,"V|P","Owner session","Add/Edit/Delete member","Owner actions succeed","","","",NOT_RUN
+TC-TEAM-004,P0,Team,API/E2E,"V|P","Viewer/editor session","Try manage member","Forbidden error","","","",NOT_RUN
+TC-TEAM-005,P0,Team Limits,API/E2E,"V|P","Solo plan institute","Add second user","PLAN_USER_LIMIT_REACHED","","","",NOT_RUN
+TC-TEAM-006,P0,Team Limits,API/E2E,"V|P","Team plan institute with 5 users","Add sixth user","Limit error","","","",NOT_RUN
+TC-BILL-001,P0,Billing Trial,API,V,"New institute","Fetch subscription","Trial bootstrap fields set","","","",NOT_RUN
+TC-BILL-003,P0,Billing Trial,API,V,"Expired trial record","Call billing/auth-me path","Status becomes INACTIVE","","","",NOT_RUN
+TC-BILL-004,P0,Billing Access,E2E,P,"Inactive subscription session","Open protected route","Redirect to /billing","","","",NOT_RUN
+TC-BILL-006,P0,Billing,Razorpay API,V,"SOLO env set","Create SOLO subscription","SOLO plan id used","","","",NOT_RUN
+TC-BILL-007,P0,Billing,Razorpay API,V,"TEAM env set","Create TEAM subscription","TEAM plan id used","","","",NOT_RUN
+TC-BILL-010,P0,Webhook,API,V,"Valid webhook signature","Send subscription.activated","Status ACTIVE","","","",NOT_RUN
+TC-BILL-012,P0,Webhook,API,V,"Valid webhook signature","Send payment.failed","Status INACTIVE","","","",NOT_RUN
+TC-BILL-014,P1,Billing UI,UI/E2E,"TL|P","INACTIVE status summary","Open /billing","Trial expired banner visible","","","",NOT_RUN
+TC-API-001,P0,API Security,API,V,"No session","Call protected endpoints","401 unauthorized","","","",NOT_RUN
+TC-API-003,P0,API Security,API,V,"Two institutes with data","Mutate cross-institute resource","Blocked by scoping","","","",NOT_RUN
+TC-SEO-001,P0,SEO,SEO/E2E,P,"App running","Open /robots.txt","Robots + sitemap pointer present","","","",NOT_RUN
+TC-SEO-002,P0,SEO,SEO/E2E,P,"App running","Open /sitemap.xml","Sitemap responds","","","",NOT_RUN
+TC-SEO-003,P0,SEO,SEO/API,"V|P","Institutes with slugs exist","Inspect sitemap entries","Only /i/{slug} institute URLs","","","",NOT_RUN
+TC-STAB-001,P0,Stability,Build,M,"Repo clean","Run pnpm build","Build succeeds","","","",NOT_RUN
+TC-STAB-003,P0,Stability,E2E,P,"Staging deployed","Run smoke journey","Critical path passes","","","",NOT_RUN
