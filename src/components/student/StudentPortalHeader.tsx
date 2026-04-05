@@ -74,7 +74,7 @@ export default function StudentPortalHeader() {
                                 <AvatarFallback>{instituteInitials}</AvatarFallback>
                             </Avatar>
                         )}
-                        <p className="truncate text-base font-semibold">{instituteName}</p>
+                        <h2 className="truncate text-base font-semibold">{instituteName}</h2>
                     </div>
 
                     <DropdownMenu>

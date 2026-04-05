@@ -350,7 +350,7 @@ export default function LeadsPage() {
                                     <CardContent className="space-y-3 pt-4">
                                         <div className="flex items-start justify-between gap-2">
                                             <div>
-                                                <p className="text-sm font-semibold">{lead.name}</p>
+                                                <h3 className="text-sm font-semibold">{lead.name}</h3>
                                                 <p className="text-xs text-muted-foreground">{lead.phone}</p>
                                             </div>
                                             <Badge variant="secondary" className={STATUS_COLORS[lead.status] ?? ""}>

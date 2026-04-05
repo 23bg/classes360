@@ -40,7 +40,7 @@ export default function StudentAnnouncementsPage() {
                         <div className="space-y-3">
                             {announcements.map((item, index) => (
                                 <div key={`${item.title}-${index}`} className="rounded-lg border p-4">
-                                    <p className="font-semibold">{item.title}</p>
+                                    <h2 className="font-semibold">{item.title}</h2>
                                     <p className="mt-1 text-sm text-muted-foreground">{item.body}</p>
                                     <div className="mt-3 flex items-center justify-between gap-3">
                                         <p className="text-xs text-muted-foreground">{new Date(item.createdAt).toLocaleString()}</p>

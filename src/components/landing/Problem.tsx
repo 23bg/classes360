@@ -15,8 +15,8 @@ export default function Problem() {
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <Card className="border-border bg-muted/80">
                         <CardContent className="p-4 md:p-6 opacity-80">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Before</p>
-                            <h3 className="mt-2 text-base md:text-lg font-medium text-foreground">WhatsApp + Excel</h3>
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Before</h3>
+                            <h4 className="mt-2 text-base md:text-lg font-medium text-foreground">WhatsApp + Excel</h4>
                             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
                                 <li>• Follow-ups scattered across personal chats</li>
                                 <li>• Duplicate entries in multiple sheets</li>
@@ -27,8 +27,8 @@ export default function Problem() {
                     </Card>
                     <Card className="border-border bg-card">
                         <CardContent className="p-4 md:p-6">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-primary">After</p>
-                            <h3 className="mt-2 text-base md:text-lg font-medium text-foreground">Classes360 System</h3>
+                            <h3 className="text-xs font-semibold uppercase tracking-wide text-primary">After</h3>
+                            <h4 className="mt-2 text-base md:text-lg font-medium text-foreground">Classes360 System</h4>
                             <ul className="mt-4 space-y-2 text-sm text-foreground">
                                 <li>• Every enquiry captured in one pipeline</li>
                                 <li>• Follow-ups assigned with clear accountability</li>

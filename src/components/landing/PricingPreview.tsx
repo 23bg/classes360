@@ -27,7 +27,7 @@ export default function PricingPreview() {
                     {plans.map((plan) => (
                         <Card key={plan.name} className="border-border bg-card h-full">
                             <CardContent className="p-4 md:p-6 flex flex-col h-full">
-                                <p className="text-sm font-semibold text-primary">{plan.name}</p>
+                                <h3 className="text-sm font-semibold text-primary">{plan.name}</h3>
                                 <p className="mt-2 text-2xl font-bold text-foreground">{plan.price}</p>
                                 <p className="mt-2 text-sm text-muted-foreground">{plan.summary}</p>
                             </CardContent>

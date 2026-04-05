@@ -139,7 +139,7 @@ export function DashboardAppSidebar({ ...props }: React.ComponentProps<typeof Si
 
 
 
-                                    <p className="text-xl font-semibold text-primary">Classes360</p>
+                                    <h2 className="text-xl font-semibold text-primary">Classes360</h2>
                                     <p className="text-xs text-muted-foreground hover:text-muted-foreground">Manage your institute</p>
 
 

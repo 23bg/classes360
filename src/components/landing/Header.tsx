@@ -25,7 +25,7 @@ export default function LandingHeader() {
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-3 md:px-6">
                 <div className="flex items-center gap-6">
                     <Link href="/" className="text-base font-bold tracking-tight">
-                        {tNavbar("brand")}
+                        <h1>{tNavbar("brand")}</h1>
                     </Link>
 
                     <nav className="hidden items-center gap-5 text-sm text-muted-foreground md:flex">

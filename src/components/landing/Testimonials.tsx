@@ -38,7 +38,7 @@ export default function Testimonials() {
                                 <Quote className="h-5 w-5 text-primary" aria-hidden />
                                 <p className="mt-4 text-sm leading-6 text-foreground">"{item.quote}"</p>
                                 <div className="mt-5 border-t pt-3">
-                                    <p className="text-sm font-semibold text-foreground">{item.institute}</p>
+                                    <h3 className="text-sm font-semibold text-foreground">{item.institute}</h3>
                                     <p className="text-xs text-muted-foreground">{item.role}</p>
                                 </div>
                             </CardContent>

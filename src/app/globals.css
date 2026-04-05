@@ -81,12 +81,13 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+                font-family: var(--font-inter), sans-serif;
   }
 
   body {
     @apply text-foreground bg-amber-400;
     }
-    
+
     h1,
     h2,
     h3,

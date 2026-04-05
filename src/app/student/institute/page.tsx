@@ -109,7 +109,7 @@ export default function StudentInstitutePage() {
                                             </div>
                                         )}
                                         <div>
-                                            <p className="font-semibold">{teacher.name || "Teacher"}</p>
+                                            <h3 className="font-semibold">{teacher.name || "Teacher"}</h3>
                                             <p className="text-xs text-muted-foreground">{teacher.subject || "Subject to be announced"}</p>
                                         </div>
                                     </div>

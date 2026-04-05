@@ -40,7 +40,7 @@ export default function PlanCard({
                 <p className="text-sm text-muted-foreground">{billingSuffix}</p>
 
                 <div className="space-y-1">
-                    <p className="text-lg font-semibold">{plan.name}</p>
+                    <h3 className="text-lg font-semibold">{plan.name}</h3>
                     <p className="text-sm text-muted-foreground">{plan.description}</p>
                 </div>
             </CardHeader>

@@ -32,7 +32,7 @@ export default function Hero() {
                 {/* Right: System Flow Visual */}
                 <Card className="border-border bg-card h-full">
                     <CardContent className="p-4 md:p-6">
-                        <p className="mb-4 text-sm font-semibold text-primary">System flow visual</p>
+                        <h2 className="mb-4 text-sm font-semibold text-primary">System flow visual</h2>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             {flowSteps.map((step, index) => (
                                 <div key={step} className="flex flex-col items-center">
