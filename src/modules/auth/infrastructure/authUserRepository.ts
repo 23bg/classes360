@@ -39,7 +39,7 @@ export const authUserRepository = {
 
         let instituteId = user.instituteId;
         if (!instituteId) {
-            const baseSlug = (user.email.split("@")[0] || "oncampus")
+            const baseSlug = (user.email.split("@")[0] || "classes360")
                 .toLowerCase()
                 .replace(/[^a-z0-9\s-]/g, "")
                 .replace(/\s+/g, "-")
@@ -49,7 +49,7 @@ export const authUserRepository = {
             const createdInstitute = await prisma.institute.create({
                 data: {
                     name: null,
-                    slug: `temp-${baseSlug || "oncampus"}-${Date.now().toString(36)}`,
+                    slug: `temp-${baseSlug || "classes360"}-${Date.now().toString(36)}`,
                     isOnboarded: false,
                 },
                 select: { id: true },

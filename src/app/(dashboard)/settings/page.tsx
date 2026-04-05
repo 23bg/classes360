@@ -51,7 +51,7 @@ type AppSettings = {
     notifications: NotificationSettings;
 };
 
-const SETTINGS_STORAGE_KEY = "oncampus:settings";
+const SETTINGS_STORAGE_KEY = "classes360:settings";
 
 const defaultSettings: AppSettings = {
     dashboard: {
@@ -157,7 +157,7 @@ export default function SettingsPage() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = `oncampus-export-${new Date().toISOString().slice(0, 10)}.json`;
+            link.download = `classes360-export-${new Date().toISOString().slice(0, 10)}.json`;
             link.click();
             URL.revokeObjectURL(url);
 

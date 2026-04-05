@@ -9,22 +9,11 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
     allowedDevOrigins: ["127.0.0.1"],
-    async redirects() {
+    async rewrites() {
         return [
             {
-                source: "/admission-crm-:city",
-                destination: "/solutions/admission-crm/:city",
-                permanent: true,
-            },
-            {
-                source: "/student-management-software-:city",
-                destination: "/solutions/student-management-software/:city",
-                permanent: true,
-            },
-            {
-                source: "/coaching-institute-crm-:city",
-                destination: "/solutions/coaching-institute-crm/:city",
-                permanent: true,
+                source: "/sitemap-dynamic-:id.xml",
+                destination: "/sitemap-dynamic-[id].xml?id=:id",
             },
         ];
     },

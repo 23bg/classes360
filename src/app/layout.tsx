@@ -1,7 +1,7 @@
 ﻿import type { Metadata } from "next";
-import "@/styles/globals.css";
+import "./globals.css";
 import NextTopLoader from "nextjs-toploader";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
@@ -79,22 +79,21 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${jakarta.variable}`}
     >
-      <body className="bg-background text-foreground antialiased">
-        <ThemeProvider>
+      <body className="bg-background text-foreground antialiased font-sans">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <NextTopLoader showSpinner={false} color="var(--color-primary)" shadow={false} />
             {children}
             <Toaster
               duration={3000}
-              position={"bottom-right"}
+              position="bottom-right"
               richColors
-              expand={true}
-              offset={{ bottom: '1.5rem' }}
+              expand
+              offset={{ bottom: "1.5rem" }}
             />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
-
     </html>
   );
 }

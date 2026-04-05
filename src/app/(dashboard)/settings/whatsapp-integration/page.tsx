@@ -15,7 +15,7 @@ import {
 } from "@/features/dashboard/dashboardSlice";
 
 type WhatsAppIntegrationState = {
-    mode: "ONCAMPUS_SHARED" | "INSTITUTE_CUSTOM";
+    mode: "CLASSES360_SHARED" | "INSTITUTE_CUSTOM";
     connectedNumber: string | null;
     status: "PENDING" | "VERIFIED" | "ACTIVE" | "DISCONNECTED" | "FAILED";
     phoneNumberId: string | null;
@@ -24,7 +24,7 @@ type WhatsAppIntegrationState = {
 };
 
 const DEFAULT_STATE: WhatsAppIntegrationState = {
-    mode: "ONCAMPUS_SHARED",
+    mode: "CLASSES360_SHARED",
     connectedNumber: null,
     status: "DISCONNECTED",
     phoneNumberId: null,

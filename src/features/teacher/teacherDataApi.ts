@@ -20,7 +20,7 @@ export const teacherRepository = {
         prisma.user.create({
             data: {
                 instituteId: payload.instituteId,
-                email: `teacher.${payload.instituteId}.${Date.now()}.${Math.random().toString(36).slice(2, 10)}@oncampus.local`,
+                email: `teacher.${payload.instituteId}.${Date.now()}.${Math.random().toString(36).slice(2, 10)}@classes360.local`,
                 name: payload.name,
                 role: "VIEWER",
                 subject: payload.subject,

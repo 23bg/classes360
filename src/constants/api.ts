@@ -1,6 +1,6 @@
 ﻿export const API = {
     BASE_V1: '/api/v1',
-    ONCAMPUS: {
+    CLASSES360: {
         AUTH: {
             SIGN_UP: '/auth/signup',
             LOG_IN: '/auth/login',

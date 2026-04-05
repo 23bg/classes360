@@ -105,7 +105,7 @@ export const sendEventBasedWhatsAppAlert = async (input: {
         const templateEvent =
             input.templateEvent ?? DEFAULT_TEMPLATE_EVENT_BY_ALERT_EVENT[input.event] ?? "follow_up_reminder";
         const isEnabled = await whatsappIntegrationService.isNotificationEnabled(input.instituteId, templateEvent);
-        const senderType = getPreferredWhatsAppSenderType(input.event) ?? "ONCAMPUS_SYSTEM_NUMBER";
+        const senderType = getPreferredWhatsAppSenderType(input.event) ?? "CLASSES360_SYSTEM_NUMBER";
 
         if (!isEnabled) {
             logger.info({

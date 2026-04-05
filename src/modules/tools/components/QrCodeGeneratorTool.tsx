@@ -13,7 +13,7 @@ type QrHistoryItem = {
     createdAt: string;
 };
 
-const STORAGE_KEY = "oncampus_qr_history";
+const STORAGE_KEY = "classes360_qr_history";
 
 const buildQrText = (data: {
     websiteUrl: string;
@@ -130,13 +130,13 @@ export default function QrCodeGeneratorTool() {
                             />
                             <div className="flex flex-wrap gap-2">
                                 <Button asChild>
-                                    <a href={pngDataUrl} download="oncampus-qr.png">Download PNG</a>
+                                    <a href={pngDataUrl} download="classes360-qr.png">Download PNG</a>
                                 </Button>
                                 {svgContent ? (
                                     <Button asChild variant="outline">
                                         <a
                                             href={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgContent)}`}
-                                            download="oncampus-qr.svg"
+                                            download="classes360-qr.svg"
                                         >
                                             Download SVG
                                         </a>

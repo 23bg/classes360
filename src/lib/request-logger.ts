@@ -19,7 +19,7 @@ const buildRecord = (
 ) => ({
     level,
     event,
-    app: "oncampus",
+    app: "classes360",
     env: process.env.NODE_ENV || "development",
     timestamp: new Date().toISOString(),
     ...data,

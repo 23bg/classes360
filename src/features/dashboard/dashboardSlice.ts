@@ -213,7 +213,7 @@ type NotificationPreferences = {
 };
 
 type WhatsAppIntegrationState = {
-    mode: "ONCAMPUS_SHARED" | "INSTITUTE_CUSTOM";
+    mode: "CLASSES360_SHARED" | "INSTITUTE_CUSTOM";
     connectedNumber: string | null;
     status: "PENDING" | "VERIFIED" | "ACTIVE" | "DISCONNECTED" | "FAILED";
     phoneNumberId: string | null;
@@ -305,7 +305,7 @@ type BillingDashboardPayload = {
         notifyPaymentMethodUpdate?: boolean;
     };
     sender?: {
-        mode: "ONCAMPUS_SHARED" | "INSTITUTE_CUSTOM";
+        mode: "CLASSES360_SHARED" | "INSTITUTE_CUSTOM";
         connectedNumber?: string | null;
         status?: string;
     };
@@ -382,7 +382,7 @@ const DEFAULT_PREFS: NotificationPreferences = {
 };
 
 const DEFAULT_WHATSAPP: WhatsAppIntegrationState = {
-    mode: "ONCAMPUS_SHARED",
+    mode: "CLASSES360_SHARED",
     connectedNumber: null,
     status: "DISCONNECTED",
     phoneNumberId: null,

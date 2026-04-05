@@ -20,7 +20,7 @@ type Message = {
     text: string;
 };
 
-const CHAT_STORAGE_KEY = "oncampus:imrabo-chat";
+const CHAT_STORAGE_KEY = "classes360:imrabo-chat";
 
 const QUICK_SUGGESTIONS = [
     "Add enquiry",

@@ -17,8 +17,8 @@ export default function Footer() {
                             {/* Brand Column */}
                             <div className="space-y-6 lg:col-span-2">
                                 <div>
-                                    <p className="text-xl font-semibold tracking-tight text-foreground">{t("brand")}</p>
-                                    <p className="mt-1 text-sm text-muted-foreground">{t("tagline")}</p>
+                                    <h1 className="text-xl font-semibold tracking-tight text-foreground">{t("brand")}</h1>
+                                    <h2 className="mt-1 text-sm text-muted-foreground">{t("tagline")}</h2>
                                 </div>
                                 {/* Trust Badges */}
                                 <div className="flex flex-col gap-1 text-xs text-muted-foreground">

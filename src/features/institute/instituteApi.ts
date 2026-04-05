@@ -235,7 +235,7 @@ const tempSlugFromIdentity = (identity: string): string => {
         .replace(/(^-|-$)/g, "")
         .slice(0, 30);
 
-    return `temp-${base || "oncampus"}-${Date.now().toString(36)}`;
+    return `temp-${base || "classes360"}-${Date.now().toString(36)}`;
 };
 
 const ensureInstituteForUser = async (userId: string) => {
@@ -588,7 +588,7 @@ export const instituteService = {
         if (byDomain?.slug) return this.getPublicPage(byDomain.slug);
 
         if (normalizedHost.endsWith(".classes360.online")) {
-            const sub = normalizedHost.replace(/\.oncampus\.in$/, "");
+            const sub = normalizedHost.replace(/\.classes360\.in$/, "");
             if (sub && !["portal", "student", "www", "api"].includes(sub)) {
                 return this.getPublicPage(sub);
             }

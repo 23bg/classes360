@@ -11,7 +11,7 @@ import {
 
 type StrategicRow = {
     area: string;
-    onCampus: string;
+    classes360: string;
     crm: string;
     manual: string;
 };
@@ -19,31 +19,31 @@ type StrategicRow = {
 const rows: StrategicRow[] = [
     {
         area: "Admission workflow",
-        onCampus: "Built for enquiry-to-admission flow out of the box",
+        classes360: "Built for enquiry-to-admission flow out of the box",
         crm: "Needs heavy customization for academic workflows",
         manual: "Manual updates and fragmented tracking",
     },
     {
         area: "WhatsApp usage",
-        onCampus: "Integrated alerts and business number support",
+        classes360: "Integrated alerts and business number support",
         crm: "Requires connectors or third-party tools",
         manual: "Ad hoc chats without unified tracking",
     },
     {
         area: "Setup time",
-        onCampus: "Go live quickly with institute-focused defaults",
+        classes360: "Go live quickly with institute-focused defaults",
         crm: "Long setup with pipelines and automation",
         manual: "Quick start but no scalable structure",
     },
     {
         area: "Ease of use",
-        onCampus: "Simple, role-based workflow for teams",
+        classes360: "Simple, role-based workflow for teams",
         crm: "General-purpose UI with learning curve",
         manual: "Familiar but inconsistent process",
     },
     {
         area: "Scaling",
-        onCampus: "Handles multi-user ownership and high volume",
+        classes360: "Handles multi-user ownership and high volume",
         crm: "Scales but cost and complexity increase",
         manual: "Breaks with team growth and volume",
     },
@@ -81,7 +81,7 @@ export default function StrategicComparisonSection() {
                                 </TableCell>
 
                                 <TableCell className="bg-muted/30 max-w-[220px] align-top">
-                                    <Cell type="positive" text={row.onCampus} />
+                                    <Cell type="positive" text={row.classes360} />
                                 </TableCell>
 
                                 <TableCell className="max-w-[220px] align-top">

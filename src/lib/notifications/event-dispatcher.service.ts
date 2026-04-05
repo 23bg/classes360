@@ -115,7 +115,7 @@ const dispatchChannel = async (
         return;
     }
 
-    if (channel === "WHATSAPP_ONCAMPUS" || channel === "WHATSAPP_INSTITUTE") {
+    if (channel === "WHATSAPP_CLASSES360" || channel === "WHATSAPP_INSTITUTE") {
         await sendEventBasedWhatsAppAlert({
             event: input.event,
             instituteId: input.instituteId,
@@ -155,7 +155,7 @@ export const eventDispatcherService = {
         const channels: NotificationChannel[] = [
             "IN_APP_ADMIN",
             "IN_APP_STUDENT_PORTAL",
-            "WHATSAPP_ONCAMPUS",
+            "WHATSAPP_CLASSES360",
             "WHATSAPP_INSTITUTE",
             "EMAIL",
         ];

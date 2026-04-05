@@ -8,7 +8,7 @@ export default function AuthLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background font-sans">
             <LandingHeader />
             <main className="mx-auto flex w-full max-w-7xl items-center justify-center px-4 py-12 md:px-6 lg:py-16">
                 <div className="w-full max-w-md">{children}</div>

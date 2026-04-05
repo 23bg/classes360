@@ -74,7 +74,7 @@ describe("sendSystemAlert sender routing", () => {
 
     it("uses shared sender when institute has no connected sender", async () => {
         mockWhatsAppIntegrationService.getSenderRouting.mockResolvedValue({
-            mode: "ONCAMPUS_SHARED",
+            mode: "CLASSES360_SHARED",
             senderPhoneNumberId: "shared_phone_id",
             fallbackPhoneNumberId: "shared_phone_id",
         });

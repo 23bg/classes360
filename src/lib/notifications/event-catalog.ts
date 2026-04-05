@@ -1,7 +1,7 @@
 export const NOTIFICATION_CHANNELS = [
     "IN_APP_ADMIN",
     "IN_APP_STUDENT_PORTAL",
-    "WHATSAPP_ONCAMPUS",
+    "WHATSAPP_CLASSES360",
     "WHATSAPP_INSTITUTE",
     "EMAIL",
 ] as const;
@@ -18,7 +18,7 @@ export const NOTIFICATION_AUDIENCES = [
 export type NotificationAudience = (typeof NOTIFICATION_AUDIENCES)[number];
 
 export const WHATSAPP_SENDER_TYPES = [
-    "ONCAMPUS_SYSTEM_NUMBER",
+    "CLASSES360_SYSTEM_NUMBER",
     "INSTITUTE_WHATSAPP_NUMBER",
 ] as const;
 
@@ -90,9 +90,9 @@ export type NotificationEventRule = {
 
 export const NOTIFICATION_EVENT_RULES: Record<NotificationEvent, NotificationEventRule> = {
     PUBLIC_ENQUIRY_SUBMITTED: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360"],
         defaultAudiences: ["INSTITUTE_USERS"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
     PUBLIC_ENQUIRY_CONFIRMATION: {
         channels: ["WHATSAPP_INSTITUTE", "EMAIL"],
@@ -101,14 +101,14 @@ export const NOTIFICATION_EVENT_RULES: Record<NotificationEvent, NotificationEve
     },
 
     LEAD_CREATED: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360"],
         defaultAudiences: ["INSTITUTE_USERS"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
     LEAD_ASSIGNED: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360"],
         defaultAudiences: ["INSTITUTE_TEAM_MEMBER"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
     LEAD_STATUS_CHANGED: {
         channels: ["IN_APP_ADMIN"],
@@ -127,14 +127,14 @@ export const NOTIFICATION_EVENT_RULES: Record<NotificationEvent, NotificationEve
         defaultAudiences: ["INSTITUTE_USERS"],
     },
     FOLLOW_UP_REMINDER: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360"],
         defaultAudiences: ["INSTITUTE_TEAM_MEMBER"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
     LEAD_CONVERTED_TO_STUDENT: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360"],
         defaultAudiences: ["INSTITUTE_OWNER"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
 
     STUDENT_CREATED: {
@@ -294,9 +294,9 @@ export const NOTIFICATION_EVENT_RULES: Record<NotificationEvent, NotificationEve
         defaultAudiences: ["INSTITUTE_USERS"],
     },
     INSTITUTE_ONBOARDING_COMPLETED: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360"],
         defaultAudiences: ["INSTITUTE_USERS"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
 
     TRIAL_STARTED: {
@@ -304,24 +304,24 @@ export const NOTIFICATION_EVENT_RULES: Record<NotificationEvent, NotificationEve
         defaultAudiences: ["INSTITUTE_OWNER"],
     },
     TRIAL_ENDING_SOON: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS", "EMAIL"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360", "EMAIL"],
         defaultAudiences: ["INSTITUTE_OWNER"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
     SUBSCRIPTION_CREATED: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS", "EMAIL"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360", "EMAIL"],
         defaultAudiences: ["INSTITUTE_OWNER"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
     SUBSCRIPTION_PAYMENT_SUCCESS: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS", "EMAIL"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360", "EMAIL"],
         defaultAudiences: ["INSTITUTE_OWNER"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
     SUBSCRIPTION_PAYMENT_FAILED: {
-        channels: ["IN_APP_ADMIN", "WHATSAPP_ONCAMPUS", "EMAIL"],
+        channels: ["IN_APP_ADMIN", "WHATSAPP_CLASSES360", "EMAIL"],
         defaultAudiences: ["INSTITUTE_OWNER"],
-        whatsappSenderType: "ONCAMPUS_SYSTEM_NUMBER",
+        whatsappSenderType: "CLASSES360_SYSTEM_NUMBER",
     },
     SUBSCRIPTION_CANCELLED: {
         channels: ["IN_APP_ADMIN", "EMAIL"],
@@ -354,7 +354,7 @@ export const NOTIFICATION_EVENT_RULES: Record<NotificationEvent, NotificationEve
 };
 
 export const WHATSAPP_CHANNEL_SET = new Set<NotificationChannel>([
-    "WHATSAPP_ONCAMPUS",
+    "WHATSAPP_CLASSES360",
     "WHATSAPP_INSTITUTE",
 ]);
 
@@ -367,7 +367,7 @@ export const supportsWhatsAppForEvent = (event: NotificationEvent): boolean =>
 export const getPreferredWhatsAppSenderType = (event: NotificationEvent): WhatsAppSenderType | null => {
     const rule = NOTIFICATION_EVENT_RULES[event];
     if (!supportsWhatsAppForEvent(event)) return null;
-    return rule.whatsappSenderType ?? "ONCAMPUS_SYSTEM_NUMBER";
+    return rule.whatsappSenderType ?? "CLASSES360_SYSTEM_NUMBER";
 };
 
 export const getEventAudiences = (

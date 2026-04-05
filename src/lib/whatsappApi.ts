@@ -154,7 +154,7 @@ export const sendSystemAlert = async (
     instituteId: string,
     phoneNumber: string,
     message: string,
-    senderType: WhatsAppSenderType = "ONCAMPUS_SYSTEM_NUMBER"
+    senderType: WhatsAppSenderType = "CLASSES360_SYSTEM_NUMBER"
 ): Promise<SendSystemAlertResult> => {
     try {
         const policy = await billingService.getOperationalPolicy(instituteId);
@@ -201,7 +201,7 @@ export const sendSystemAlert = async (
             senderType === "INSTITUTE_WHATSAPP_NUMBER"
                 ? await whatsappIntegrationService.getSenderRouting(instituteId)
                 : {
-                    mode: "ONCAMPUS_SHARED" as const,
+                    mode: "CLASSES360_SHARED" as const,
                     senderPhoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID ?? null,
                     fallbackPhoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID ?? null,
                 };
@@ -247,7 +247,7 @@ export const sendSystemAlert = async (
                 },
                 sender.fallbackPhoneNumberId
             );
-            senderMode = "ONCAMPUS_SHARED";
+            senderMode = "CLASSES360_SHARED";
         }
         // const result = await sendWhatsAppPayload({
         //     messaging_product: "whatsapp",

@@ -26,7 +26,7 @@ export default function DashboardLayout({
 }) {
     return (
         <DashboardShowcaseTour enabled={showFirstLoginShowcase}>
-            <SidebarProvider className=" overflow-hidden h-screen">
+            <SidebarProvider className="overflow-hidden h-screen font-sans">
                 <DashboardAppSidebar />
 
                 <SidebarInset className="border-none shadow-none bg-muted/30 backdrop-blur-sm rounded-2xl">

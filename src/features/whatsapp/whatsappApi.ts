@@ -6,7 +6,7 @@ const phoneSchema = z.string().trim().regex(/^\+?[1-9]\d{9,14}$/, "Invalid phone
 const otpSchema = z.string().trim().regex(/^\d{6}$/, "Invalid OTP");
 const idSchema = z.string().trim().min(3).max(64);
 
-export type SenderMode = "ONCAMPUS_SHARED" | "INSTITUTE_CUSTOM";
+export type SenderMode = "CLASSES360_SHARED" | "INSTITUTE_CUSTOM";
 
 const DEMO_OTP = "123456";
 
@@ -35,7 +35,7 @@ export const whatsappIntegrationService = {
         }
 
         return {
-            mode: "ONCAMPUS_SHARED" as const,
+            mode: "CLASSES360_SHARED" as const,
             senderPhoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID ?? null,
             account,
             fallbackPhoneNumberId: env.WHATSAPP_PHONE_NUMBER_ID ?? null,

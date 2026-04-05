@@ -6,7 +6,7 @@ const isTest = process.env.NODE_ENV === "test";
 const options: LoggerOptions = {
   level: process.env.LOG_LEVEL || (isTest ? "warn" : isDev ? "debug" : "info"),
   base: {
-    app: "oncampus",
+    app: "classes360",
     env: process.env.NODE_ENV || "development",
   },
   timestamp: pino.stdTimeFunctions.isoTime,
