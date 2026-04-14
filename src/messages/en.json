@@ -151,7 +151,7 @@
         "previewAlt": "Classes360 demo video"
     },
     "pricing": {
-        "title": "Simple pricing you can plan with confidence.",
+        "title": "Unlimited Students. Unlimited Enquiries. No Hidden Commissions.",
         "description": "Choose by team size. Keep all core features from day one.",
         "positioningLine": "No feature lock. No usage caps. Full support included.",
         "trustStrip": {
@@ -161,8 +161,8 @@
             "item4": "Full support included"
         },
         "header": {
-            "headline": "Simple pricing your institute can trust",
-            "subtext": "Choose your plan by team size. Every plan includes all core tools with unlimited usage.",
+            "headline": "Unlimited Students. Unlimited Enquiries. No Hidden Commissions.",
+            "subtext": "We grow as you grow. Choose a plan based on your team size and communication needs.",
             "trustLine": "No feature lock, no usage caps, full support included from day one."
         },
         "valueStrip": {
@@ -251,8 +251,8 @@
         "yearlyBadge": "2 months free",
         "billingSwitchAria": "Toggle monthly and yearly pricing",
         "starterUsers": "Just you",
-        "teamUsers": "Up to 5 people",
-        "growthUsers": "Up to 20 people",
+        "teamUsers": "Up to 10 people",
+        "growthUsers": "Up to 25 people",
         "scaleUsers": "Everyone you need",
         "starterWhatsApp": "WhatsApp alerts included",
         "teamWhatsApp": "WhatsApp alerts included",
@@ -265,14 +265,14 @@
         "whatsAppAlertExample1": "New enquiry alert",
         "whatsAppAlertExample2": "Follow-up reminder",
         "whatsAppAlertExample3": "System updates",
-        "starterWhatsAppMonthly": "Optional: Connect your WhatsApp",
-        "starterWhatsAppDaily": "Fair limit (~30 chats per month)",
-        "teamWhatsAppMonthly": "Optional: Connect your WhatsApp",
-        "teamWhatsAppDaily": "Fair limit (~150 chats per month)",
-        "growthWhatsAppMonthly": "Optional: Connect your WhatsApp",
-        "growthWhatsAppDaily": "Fair limit (~600 chats per month)",
-        "scaleWhatsAppMonthly": "Optional: Connect your WhatsApp",
-        "scaleWhatsAppDaily": "Fair limit (~2000 chats per month)",
+        "starterWhatsAppMonthly": "Included: 500 chats / month",
+        "starterWhatsAppDaily": "Fair daily limit (~17 chats/day)",
+        "teamWhatsAppMonthly": "Included: 2,500 chats / month",
+        "teamWhatsAppDaily": "Fair daily limit (~84 chats/day)",
+        "growthWhatsAppMonthly": "Included: 7,500 chats / month",
+        "growthWhatsAppDaily": "Fair daily limit (~250 chats/day)",
+        "scaleWhatsAppMonthly": "Pay-as-you-go WhatsApp",
+        "scaleWhatsAppDaily": "Fair daily limit (~300 chats/day)",
         "whatsAppExtraLine": "Meta charges you for each chat you send.",
         "mostPopular": "Most picked",
         "coreSystemLine": "All core features work in every plan.",
@@ -381,10 +381,10 @@
             "rows": {
                 "users": {
                     "feature": "Users",
-                    "values": {
+                        "values": {
                         "starter": "Up to 1",
-                        "team": "Up to 5",
-                        "growth": "Up to 20",
+                        "team": "Up to 10",
+                        "growth": "Up to 25",
                         "scale": "Unlimited"
                     }
                 },

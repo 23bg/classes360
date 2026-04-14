@@ -8,7 +8,7 @@ type SectionProps = {
 
 export default function Section({ title, children, className = "" }: SectionProps) {
     return (
-        <section className={`space-y-6 ${className}`}>
+        <section className={` ${className}`}>
             {title ? (
                 <h2 className="text-lg md:text-xl font-medium text-foreground">{title}</h2>
             ) : null}

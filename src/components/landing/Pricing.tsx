@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { CheckCircle2 } from "lucide-react";
 import PlanCard from "@/components/landing/pricing/PlanCard";
+import CustomPricingCard from "@/components/landing/pricing/CustomPricingCard";
 import PricingComparisonTable from "@/components/landing/pricing/PricingComparisonTable";
 import { planDefinitions } from "@/components/landing/pricing/pricing-data";
 
@@ -101,8 +102,8 @@ export default function Pricing() {
 
                 {/* PRICING CARDS */}
 
-                <div className="mt-12 grid gap-6 xl:grid-cols-4">
-                    {planDefinitions.map((plan) => (
+                <div className="mt-12 grid gap-6 lg:grid-cols-3">
+                    {planDefinitions.slice(0, 3).map((plan) => (
                         <PlanCard
                             key={plan.key}
                             plan={plan}
@@ -110,6 +111,11 @@ export default function Pricing() {
                             billingSuffix={billingSuffix}
                         />
                     ))}
+                </div>
+
+                {/* Custom pricing calculator card below the main plans */}
+                <div className="mt-6">
+                    <CustomPricingCard />
                 </div>
 
                 <PricingComparisonTable />

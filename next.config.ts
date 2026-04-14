@@ -9,11 +9,24 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
     allowedDevOrigins: ["127.0.0.1"],
-    async rewrites() {
+    // Redirect legacy sitemap files to the consolidated sitemap.xml so
+    // search engines stop requesting old index files.
+    async redirects() {
         return [
             {
+                source: "/sitemap-static.xml",
+                destination: "/sitemap.xml",
+                permanent: true,
+            },
+            {
                 source: "/sitemap-dynamic-:id.xml",
-                destination: "/sitemap-dynamic/:id",
+                destination: "/sitemap.xml",
+                permanent: true,
+            },
+            {
+                source: "/sitemap-dynamic.xml",
+                destination: "/sitemap.xml",
+                permanent: true,
             },
         ];
     },

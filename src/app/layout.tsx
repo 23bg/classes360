@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import PWARegistration from "@/components/pwa/PWARegistration";
 
 
 export const inter = Inter({
@@ -23,6 +24,7 @@ export const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://classes360.online"),
+  manifest: "/manifest.json",
   title: {
     default: "Classes360 - Admission CRM for Coaching Institutes",
     template: "%s | Classes360",
@@ -83,6 +85,7 @@ export default async function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <NextTopLoader showSpinner={false} color="var(--color-primary)" shadow={false} />
+            <PWARegistration />
             {children}
             <Toaster
               duration={3000}
