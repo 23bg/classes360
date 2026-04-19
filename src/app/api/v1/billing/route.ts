@@ -63,8 +63,9 @@ export async function POST(req: NextRequest) {
             interval?: string;
             invoiceId?: string;
             provider?: "RAZORPAY" | "STRIPE";
+            couponCode?: string;
         };
-        const typedBody = body as { action?: string; planType?: string; interval?: string; invoiceId?: string; provider?: "RAZORPAY" | "STRIPE" };
+        const typedBody = body as { action?: string; planType?: string; interval?: string; invoiceId?: string; provider?: "RAZORPAY" | "STRIPE"; couponCode?: string };
         if (body.action === "generate-invoice") {
             const invoice = await billingService.createOrUpdateClosedMonthInvoice(session.instituteId);
             return NextResponse.json({ success: true, data: invoice });
@@ -127,6 +128,7 @@ export async function POST(req: NextRequest) {
             planType: (body.planType ?? "STARTER") as "STARTER" | "TEAM" | "GROWTH" | "SCALE",
             interval,
             provider: typedBody.provider ?? null,
+            couponCode: typedBody.couponCode ?? null,
         });
         return NextResponse.json({
             success: true,

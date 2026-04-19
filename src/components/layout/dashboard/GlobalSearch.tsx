@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Search, PlusCircle, UserPlus, HandCoins, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +15,7 @@ import {
     CommandSeparator,
 } from "@/components/ui/command";
 import ROUTES from "@/constants/routes";
-import { searchGlobal } from "@/app/actions/globalSearchAction";
+import { useGlobalSearchQuery } from "@/features/globalSearch/hooks/useGlobalSearchQuery";
 import type { SearchResults } from "@/features/globalSearch/globalSearchApi";
 
 const EMPTY_RESULTS: SearchResults = {
@@ -24,12 +25,13 @@ const EMPTY_RESULTS: SearchResults = {
 };
 
 export default function GlobalSearch() {
+    const t = useTranslations("common");
     const router = useRouter();
     const [query, setQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
     const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
-    const [results, setResults] = useState<SearchResults>(EMPTY_RESULTS);
-    const [loading, setLoading] = useState(false);
+    const { data: results = EMPTY_RESULTS, isFetching: loading } = useGlobalSearchQuery(debouncedQuery, open && debouncedQuery.length >= 2);
 
     const hasAnyResult = useMemo(
         () => results.leads.length > 0 || results.students.length > 0 || results.courses.length > 0,
@@ -52,17 +54,12 @@ export default function GlobalSearch() {
 
     useEffect(() => {
         if (!open || query.trim().length < 2) {
+            setDebouncedQuery("");
             return;
         }
 
-        const timer = setTimeout(async () => {
-            try {
-                setLoading(true);
-                const res = await searchGlobal(query);
-                setResults(res ?? EMPTY_RESULTS);
-            } finally {
-                setLoading(false);
-            }
+        const timer = setTimeout(() => {
+            setDebouncedQuery(query.trim());
         }, 250);
 
         return () => clearTimeout(timer);
@@ -85,7 +82,7 @@ export default function GlobalSearch() {
             >
                 <div className="flex items-center justify-center gap-3">
                     <Search className="h-4 w-4" />
-                    <span>Search...</span>
+                    <span>{t("searchPlaceholder")}</span>
                 </div>
             </Button>
 
@@ -98,56 +95,56 @@ export default function GlobalSearch() {
                             setQuery("");
                         }
                     }}
-                    title="Global Search"
-                    description="Search across pages, leads, students, courses, and quick actions"
+                    title={t("globalSearchTitle")}
+                    description={t("globalSearchDescription")}
                 >
                     <CommandInput
                         value={query}
                         onValueChange={setQuery}
-                        placeholder="Search leads, students, courses..."
+                        placeholder={t("searchPlaceholder")}
                     />
                     <CommandList>
                         <CommandEmpty>
-                            {loading ? "Searching..." : "No results found."}
+                            {loading ? t("searching") : t("noResultsFound")}
                         </CommandEmpty>
 
-                        <CommandGroup heading="Pages">
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.ROOT)}>Dashboard</CommandItem>
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.LEADS)}>Leads</CommandItem>
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.STUDENTS)}>Students</CommandItem>
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.COURSES)}>Courses</CommandItem>
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.BATCHES)}>Batches</CommandItem>
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.FEES)}>Fees</CommandItem>
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.BILLING)}>Billing</CommandItem>
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.BILLING_PAYMENTS)}>Payments</CommandItem>
-                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.INTEGRATIONS)}>Integrations</CommandItem>
+                        <CommandGroup heading={t("pagesHeading")}>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.ROOT)}>{t("dashboard")}</CommandItem>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.LEADS)}>{t("leads")}</CommandItem>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.STUDENTS)}>{t("students")}</CommandItem>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.COURSES)}>{t("courses")}</CommandItem>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.BATCHES)}>{t("batches")}</CommandItem>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.FEES)}>{t("fees")}</CommandItem>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.BILLING)}>{t("billing")}</CommandItem>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.BILLING_PAYMENTS)}>{t("payments")}</CommandItem>
+                            <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.INTEGRATIONS)}>{t("integrations")}</CommandItem>
                         </CommandGroup>
 
                         <CommandSeparator />
 
-                        <CommandGroup heading="Quick Actions">
+                        <CommandGroup heading={t("quickActionsHeading")}> 
                             <CommandItem onSelect={() => navigateTo(`${ROUTES.DASHBOARD.LEADS}?focus=recent`)}>
                                 <PlusCircle className="h-4 w-4" />
-                                Add Lead
+                                {t("addLead")}
                             </CommandItem>
                             <CommandItem onSelect={() => navigateTo(`${ROUTES.DASHBOARD.STUDENTS}?action=add`)}>
                                 <UserPlus className="h-4 w-4" />
-                                Add Student
+                                {t("addStudent")}
                             </CommandItem>
                             <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.FEES)}>
                                 <HandCoins className="h-4 w-4" />
-                                Record Payment
+                                {t("recordPayment")}
                             </CommandItem>
                             <CommandItem onSelect={() => navigateTo(ROUTES.DASHBOARD.BATCHES)}>
                                 <Layers className="h-4 w-4" />
-                                Create Batch
+                                {t("createBatch")}
                             </CommandItem>
                         </CommandGroup>
 
                         {query.trim().length >= 2 ? (
                             <>
                                 <CommandSeparator />
-                                <CommandGroup heading="Leads">
+                                <CommandGroup heading={t("leadsHeading")}>
                                     {visibleResults.leads.map((lead) => (
                                         <CommandItem
                                             key={`lead-${lead.id}`}
@@ -161,7 +158,7 @@ export default function GlobalSearch() {
                                     ))}
                                 </CommandGroup>
 
-                                <CommandGroup heading="Students">
+                                <CommandGroup heading={t("studentsHeading")}>
                                     {visibleResults.students.map((student) => (
                                         <CommandItem
                                             key={`student-${student.id}`}
@@ -175,7 +172,7 @@ export default function GlobalSearch() {
                                     ))}
                                 </CommandGroup>
 
-                                <CommandGroup heading="Courses">
+                                <CommandGroup heading={t("coursesHeading")}>
                                     {visibleResults.courses.map((course) => (
                                         <CommandItem
                                             key={`course-${course.id}`}
@@ -183,7 +180,7 @@ export default function GlobalSearch() {
                                         >
                                             <div className="flex w-full items-center justify-between gap-2">
                                                 <span>{course.name}</span>
-                                                <span className="text-xs text-muted-foreground">{course.duration || "Duration not set"}</span>
+                                                <span className="text-xs text-muted-foreground">{course.duration || t("durationNotSet")}</span>
                                             </div>
                                         </CommandItem>
                                     ))}
@@ -192,8 +189,8 @@ export default function GlobalSearch() {
                         ) : null}
 
                         <CommandSeparator />
-                        <CommandGroup heading="Help">
-                            <CommandItem onSelect={() => navigateTo(ROUTES.HELP)}>Open Help Center</CommandItem>
+                        <CommandGroup heading={t("helpHeading")}> 
+                            <CommandItem onSelect={() => navigateTo(ROUTES.HELP)}>{t("openHelpCenter")}</CommandItem>
                         </CommandGroup>
                     </CommandList>
                 </CommandDialog>

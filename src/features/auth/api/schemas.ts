@@ -4,8 +4,9 @@ import { OTP_PURPOSE_VALUES } from "@/features/auth/constants/otpPurpose";
 const otpPurposeSchema = z.enum(OTP_PURPOSE_VALUES as [string, ...string[]]);
 
 export const signupRequestSchema = z.object({
+    name: z.string().trim().min(2),
+    phoneNumber: z.string().trim().min(6),
     email: z.string().email(),
-    password: z.string().min(8),
 });
 
 export const loginRequestSchema = z.object({

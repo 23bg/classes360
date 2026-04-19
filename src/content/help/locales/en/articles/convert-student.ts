@@ -20,8 +20,8 @@ export const convertStudentArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/convert-student/step-1.webp",
-                    alt: "Lead details before student conversion",
+                    src: "/images/empty-lead.png",
+                    alt: "Lead details empty state before conversion",
                 },
             ],
         },
@@ -36,8 +36,8 @@ export const convertStudentArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/convert-student/step-2.webp",
-                    alt: "Lead conversion with course and batch fields",
+                    src: "/images/add-student-form.png",
+                    alt: "Convert lead to student form with academic fields",
                 },
             ],
         },
@@ -52,8 +52,8 @@ export const convertStudentArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/convert-student/step-3.webp",
-                    alt: "Student record page after conversion",
+                    src: "/images/empty-student-list.png",
+                    alt: "Student list empty state after conversion",
                 },
             ],
         },

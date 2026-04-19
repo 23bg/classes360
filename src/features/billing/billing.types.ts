@@ -26,6 +26,10 @@ export type BillingCheckoutInput = {
     cancelUrl: string;
     invoiceId?: string | null;
     existingSubscriptionId?: string | null;
+    couponCode?: string | null;
+    couponOriginalAmount?: number | null;
+    couponDiscount?: number | null;
+    couponFinalAmount?: number | null;
 };
 
 export type BillingCheckoutSession = {
@@ -38,6 +42,10 @@ export type BillingCheckoutSession = {
     amount: number;
     taxes: number;
     totalAmount: number;
+    couponCode?: string | null;
+    couponOriginalAmount?: number | null;
+    couponDiscount?: number | null;
+    couponFinalAmount?: number | null;
     checkoutSessionId?: string | null;
     providerSubscriptionId?: string | null;
     providerPaymentId?: string | null;

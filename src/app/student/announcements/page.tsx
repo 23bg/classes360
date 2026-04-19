@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
-import { fetchStudentPortal } from "@/features/studentPortal/studentPortalSlice";
+import { useStudentPortal } from "@/features/studentPortal/api";
 
 type Announcement = {
     title: string;
@@ -14,12 +12,7 @@ type Announcement = {
 };
 
 export default function StudentAnnouncementsPage() {
-    const dispatch = useAppDispatch();
-    const data = useAppSelector((state) => state.studentPortal.data);
-
-    useEffect(() => {
-        void dispatch(fetchStudentPortal());
-    }, [dispatch]);
+    const { data } = useStudentPortal();
 
     const announcements = [...((data?.announcements ?? []) as Announcement[])].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()

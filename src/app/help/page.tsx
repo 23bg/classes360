@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import HelpSearch from "@/components/help/help-search";
 import { getHelpDocsByCategory, helpDocs } from "@/content/help/docs";
 
-export default function HelpHomePage() {
+export default async function HelpHomePage() {
+    const t = await getTranslations("help");
     const groupedDocs = getHelpDocsByCategory();
 
     return (
@@ -10,7 +12,7 @@ export default function HelpHomePage() {
             <HelpSearch docs={helpDocs} />
 
             <section className="rounded-xl border bg-card p-5 md:p-6">
-                <h2 className="mb-4 text-xl font-semibold">Browse by Category</h2>
+                <h2 className="mb-4 text-xl font-semibold">{t("browseByCategory")}</h2>
                 <div className="grid gap-4 md:grid-cols-2">
                     {groupedDocs.map((group) => (
                         <div key={group.category} className="rounded-lg border p-4">

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TableWidget, { Column } from "@/components/custom/TableWidget";
 
 export const metadata: Metadata = {
@@ -113,7 +114,23 @@ export default async function CourseComparisonPage({ searchParams }: CourseCompa
                     <form className="grid gap-3 md:grid-cols-[1fr_1fr_auto]" method="GET">
                         <Input name="city" placeholder="City" defaultValue={city} />
                         <Input name="course" placeholder="Course" defaultValue={course} />
-                        <Button type="submit">Apply</Button>
+                        <div className="flex gap-2 items-end">
+                            <div className="w-full">
+                                <label htmlFor="sort" className="sr-only">
+                                    Sort
+                                </label>
+                                <Select name="sort" defaultValue={sort}>
+                                    <SelectTrigger id="sort" className="w-full">
+                                        <SelectValue placeholder="Sort" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="popular">Popular</SelectItem>
+                                        <SelectItem value="newest">Newest</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <Button type="submit">Apply</Button>
+                        </div>
                     </form>
                 </CardContent>
             </Card>

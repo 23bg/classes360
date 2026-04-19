@@ -11,15 +11,14 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
 import {
-    activateDomainSettings,
-    exportSettingsData,
-    fetchDomainSettings,
-    fetchSettingsCounts,
-    saveDomainSettings,
-    verifyDomainSettings,
-} from "@/features/appInstitute/appInstituteSlice";
+    useActivateDomainSettings,
+    useDomainSettings,
+    useExportSettingsData,
+    useSaveDomainSettings,
+    useSettingsCounts,
+    useVerifyDomainSettings,
+} from "@/features/appInstitute/api";
 
 type DomainSettings = {
     slug: string;
@@ -67,23 +66,16 @@ const defaultSettings: AppSettings = {
 };
 
 export default function SettingsPage() {
-    const dispatch = useAppDispatch();
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const [settings, setSettings] = useState<AppSettings>(defaultSettings);
-    const dataCounts = useAppSelector((state) => state.appInstitute.counts.data);
-    const exporting = useAppSelector((state) => state.appInstitute.exportData.loading);
-    const domainSettings = useAppSelector((state) => state.appInstitute.domain.data);
-    const domainLoading = useAppSelector((state) => state.appInstitute.domain.loading);
-    const savingDomain = domainLoading;
-    const verifyingDomain = domainLoading;
-    const activatingDomain = domainLoading;
+    const { data: dataCounts } = useSettingsCounts();
+    const exportSettingsMutation = useExportSettingsData();
+    const { data: domainSettings, isLoading: domainLoading } = useDomainSettings();
+    const saveDomainMutation = useSaveDomainSettings();
+    const verifyDomainMutation = useVerifyDomainSettings();
+    const activateDomainMutation = useActivateDomainSettings();
     const [domainInput, setDomainInput] = useState("");
-
-    useEffect(() => {
-        void dispatch(fetchSettingsCounts());
-        void dispatch(fetchDomainSettings());
-    }, [dispatch]);
 
     useEffect(() => {
         setMounted(true);
@@ -104,7 +96,7 @@ export default function SettingsPage() {
         setDomainInput(domainSettings?.customDomain ?? "");
     }, [domainSettings]);
 
-    const domainBusy = savingDomain || verifyingDomain || activatingDomain;
+    const domainBusy = saveDomainMutation.isPending || verifyDomainMutation.isPending || activateDomainMutation.isPending || domainLoading;
 
     const getStatusVariant = (status: DomainSettings["domainStatus"]): "default" | "secondary" | "destructive" => {
         if (status === "ACTIVE") return "default";
@@ -119,28 +111,28 @@ export default function SettingsPage() {
         }
 
         try {
-            await dispatch(saveDomainSettings({ customDomain: domainInput })).unwrap();
+            await saveDomainMutation.mutateAsync({ customDomain: domainInput });
             toast.success("Domain saved. Add DNS record and verify.");
         } catch (error: any) {
-            toast.error(error?.data?.error?.message ?? "Unable to save custom domain");
+            toast.error(typeof error === "string" ? error : error?.message ?? "Unable to save custom domain");
         }
     };
 
     const verifyDomain = async () => {
         try {
-            const latest = await dispatch(verifyDomainSettings({ customDomain: domainInput })).unwrap();
+            const latest = await verifyDomainMutation.mutateAsync({ customDomain: domainInput });
             toast.success(latest?.domainVerified ? "Domain verified" : "Domain not verified yet");
         } catch (error: any) {
-            toast.error(error?.data?.error?.message ?? "Unable to verify domain");
+            toast.error(typeof error === "string" ? error : error?.message ?? "Unable to verify domain");
         }
     };
 
     const activateDomain = async () => {
         try {
-            await dispatch(activateDomainSettings({ customDomain: domainInput })).unwrap();
+            await activateDomainMutation.mutateAsync({ customDomain: domainInput });
             toast.success("Domain activated");
         } catch (error: any) {
-            toast.error(error?.data?.error?.message ?? "Unable to activate domain");
+            toast.error(typeof error === "string" ? error : error?.message ?? "Unable to activate domain");
         }
     };
 
@@ -151,7 +143,7 @@ export default function SettingsPage() {
 
     const exportData = async () => {
         try {
-            const payload = await dispatch(exportSettingsData()).unwrap();
+            const payload = await exportSettingsMutation.mutateAsync();
 
             const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
             const url = URL.createObjectURL(blob);
@@ -336,14 +328,14 @@ export default function SettingsPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        <div className="rounded border p-3"><p className="text-xs text-muted-foreground">Students</p><p className="text-lg font-semibold">{dataCounts.students}</p></div>
-                        <div className="rounded border p-3"><p className="text-xs text-muted-foreground">Leads</p><p className="text-lg font-semibold">{dataCounts.leads}</p></div>
-                        <div className="rounded border p-3"><p className="text-xs text-muted-foreground">Courses</p><p className="text-lg font-semibold">{dataCounts.courses}</p></div>
-                        <div className="rounded border p-3"><p className="text-xs text-muted-foreground">Payments</p><p className="text-lg font-semibold">{dataCounts.payments}</p></div>
+                        <div className="rounded border p-3"><p className="text-xs text-muted-foreground">Students</p><p className="text-lg font-semibold">{dataCounts?.students ?? 0}</p></div>
+                        <div className="rounded border p-3"><p className="text-xs text-muted-foreground">Leads</p><p className="text-lg font-semibold">{dataCounts?.leads ?? 0}</p></div>
+                        <div className="rounded border p-3"><p className="text-xs text-muted-foreground">Courses</p><p className="text-lg font-semibold">{dataCounts?.courses ?? 0}</p></div>
+                        <div className="rounded border p-3"><p className="text-xs text-muted-foreground">Payments</p><p className="text-lg font-semibold">{dataCounts?.payments ?? 0}</p></div>
                     </div>
 
-                    <Button variant="outline" onClick={exportData} disabled={exporting}>
-                        {exporting ? "Exporting..." : "Export Data"}
+                    <Button variant="outline" onClick={exportData} disabled={exportSettingsMutation.isPending}>
+                        {exportSettingsMutation.isPending ? "Exporting..." : "Export Data"}
                     </Button>
                 </CardContent>
             </Card>
@@ -388,17 +380,17 @@ export default function SettingsPage() {
 
                     <div className="flex flex-wrap gap-2">
                         <Button onClick={saveDomain} disabled={domainBusy}>
-                            {savingDomain ? "Saving..." : "Save Domain"}
+                            {saveDomainMutation.isPending ? "Saving..." : "Save Domain"}
                         </Button>
                         <Button variant="outline" onClick={verifyDomain} disabled={domainBusy || !domainInput.trim()}>
-                            {verifyingDomain ? "Verifying..." : "Verify DNS"}
+                            {verifyDomainMutation.isPending ? "Verifying..." : "Verify DNS"}
                         </Button>
                         <Button
                             variant="outline"
                             onClick={activateDomain}
                             disabled={domainBusy || !domainSettings?.domainVerified}
                         >
-                            {activatingDomain ? "Activating..." : "Activate Domain"}
+                            {activateDomainMutation.isPending ? "Activating..." : "Activate Domain"}
                         </Button>
                     </div>
                 </CardContent>

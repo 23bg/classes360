@@ -7,21 +7,32 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { API } from "@/constants/api";
 import api from "@/lib/axios";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { clientLogger } from "@/lib/clientLogger";
 
+const optionalPhoneSchema = z
+    .string()
+    .trim()
+    .max(20, "Phone number must be less than 20 characters.")
+    .refine((value) => {
+        if (!value) return true;
+        const digits = value.replace(/\D/g, "");
+        return digits.length >= 10 && digits.length <= 15;
+    }, "Phone must be 10 to 15 digits.")
+    .or(z.literal(""));
+
 const businessSchema = z.object({
     name: z.string().min(2, "Business name must be at least 2 characters").max(100, "Business name must be less than 100 characters"),
     description: z.string().max(500, "Description must be less than 500 characters").optional().or(z.literal("")),
     category: z.string().optional().or(z.literal("")),
     email: z.string().email("Please enter a valid email").optional().or(z.literal("")),
-    phoneNumber1: z.string().optional().or(z.literal("")),
-    phoneNumber2: z.string().optional().or(z.literal("")),
+    phoneNumber1: optionalPhoneSchema,
+    phoneNumber2: optionalPhoneSchema,
     address: z.string().optional().or(z.literal("")),
     city: z.string().optional().or(z.literal("")),
     state: z.string().optional().or(z.literal("")),
@@ -39,11 +50,7 @@ interface BusinessOnboardingFormProps {
 export function BusinessOnboardingForm({ onSuccess }: BusinessOnboardingFormProps) {
     const [isLoading, setIsLoading] = useState(false);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm<BusinessFormData>({
+    const form = useForm<BusinessFormData>({
         resolver: zodResolver(businessSchema),
         defaultValues: {
             name: "",
@@ -104,204 +111,217 @@ export function BusinessOnboardingForm({ onSuccess }: BusinessOnboardingFormProp
                 </CardDescription>
             </CardHeader>
             <CardContent>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    {/* Basic Information */}
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Basic Information</h3>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        {/* Basic Information */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium">Basic Information</h3>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Business Name *</Label>
-                                <Input
-                                    id="name"
-                                    {...register("name")}
-                                    placeholder="Enter your business name"
-                                    disabled={isLoading}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="name"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>Business Name *</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="Enter your business name" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
                                 />
-                                {errors.name && (
-                                    <p className="text-sm text-red-500">{errors.name.message}</p>
-                                )}
                             </div>
-                        </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                {...register("description")}
-                                placeholder="Tell us about your business..."
-                                rows={3}
-                                disabled={isLoading}
+                            <FormField
+                                control={form.control}
+                                name="description"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-2">
+                                        <FormLabel>Description</FormLabel>
+                                        <FormControl>
+                                            <Textarea {...field} placeholder="Tell us about your business..." rows={3} disabled={isLoading} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            {errors.description && (
-                                <p className="text-sm text-red-500">{errors.description.message}</p>
-                            )}
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="category">Category</Label>
-                                <Input
-                                    id="category"
-                                    {...register("category")}
-                                    placeholder="e.g., Restaurant, Retail, Services"
-                                    disabled={isLoading}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="category"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>Category</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="e.g., Restaurant, Retail, Services" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
                                 />
-                                {errors.category && (
-                                    <p className="text-sm text-red-500">{errors.category.message}</p>
-                                )}
-                            </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="website">Website</Label>
-                                <Input
-                                    id="website"
-                                    {...register("website")}
-                                    placeholder="https://yourbusiness.com"
-                                    disabled={isLoading}
+                                <FormField
+                                    control={form.control}
+                                    name="website"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>Website</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} type="url" placeholder="https://yourbusiness.com" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
                                 />
-                                {errors.website && (
-                                    <p className="text-sm text-red-500">{errors.website.message}</p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Contact Information */}
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Contact Information</h3>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    {...register("email")}
-                                    placeholder="contact@yourbusiness.com"
-                                    disabled={isLoading}
-                                />
-                                {errors.email && (
-                                    <p className="text-sm text-red-500">{errors.email.message}</p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="phoneNumber1">Phone Number 1</Label>
-                                <Input
-                                    id="phoneNumber1"
-                                    {...register("phoneNumber1")}
-                                    placeholder="+1 (555) 123-4567"
-                                    disabled={isLoading}
-                                />
-                                {errors.phoneNumber1 && (
-                                    <p className="text-sm text-red-500">{errors.phoneNumber1.message}</p>
-                                )}
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="phoneNumber2">Phone Number 2</Label>
-                            <Input
-                                id="phoneNumber2"
-                                {...register("phoneNumber2")}
-                                placeholder="Alternative phone number"
-                                disabled={isLoading}
+                        {/* Contact Information */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium">Contact Information</h3>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>Email</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} type="email" placeholder="contact@yourbusiness.com" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="phoneNumber1"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>Phone Number 1</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="+1 (555) 123-4567" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormDescription>Optional. 10 to 15 digits.</FormDescription>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <FormField
+                                control={form.control}
+                                name="phoneNumber2"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-2">
+                                        <FormLabel>Phone Number 2</FormLabel>
+                                        <FormControl>
+                                            <Input {...field} placeholder="Alternative phone number" disabled={isLoading} />
+                                        </FormControl>
+                                        <FormDescription>Optional. 10 to 15 digits.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            {errors.phoneNumber2 && (
-                                <p className="text-sm text-red-500">{errors.phoneNumber2.message}</p>
-                            )}
                         </div>
-                    </div>
 
-                    {/* Address Information */}
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-medium">Address Information</h3>
+                        {/* Address Information */}
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-medium">Address Information</h3>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="address">Street Address</Label>
-                            <Textarea
-                                id="address"
-                                {...register("address")}
-                                placeholder="123 Business St, Suite 100"
-                                rows={2}
-                                disabled={isLoading}
+                            <FormField
+                                control={form.control}
+                                name="address"
+                                render={({ field }) => (
+                                    <FormItem className="space-y-2">
+                                        <FormLabel>Street Address</FormLabel>
+                                        <FormControl>
+                                            <Textarea {...field} placeholder="123 Business St, Suite 100" rows={2} disabled={isLoading} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
                             />
-                            {errors.address && (
-                                <p className="text-sm text-red-500">{errors.address.message}</p>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                <FormField
+                                    control={form.control}
+                                    name="city"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>City</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="City" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="state"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>State</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="State" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="country"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>Country</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="Country" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="pincode"
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-2">
+                                            <FormLabel>Pincode</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="12345" disabled={isLoading} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                        </div>
+
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={isLoading}
+                        >
+                            {isLoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Creating Business...
+                                </>
+                            ) : (
+                                "Create Business"
                             )}
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="city">City</Label>
-                                <Input
-                                    id="city"
-                                    {...register("city")}
-                                    placeholder="City"
-                                    disabled={isLoading}
-                                />
-                                {errors.city && (
-                                    <p className="text-sm text-red-500">{errors.city.message}</p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="state">State</Label>
-                                <Input
-                                    id="state"
-                                    {...register("state")}
-                                    placeholder="State"
-                                    disabled={isLoading}
-                                />
-                                {errors.state && (
-                                    <p className="text-sm text-red-500">{errors.state.message}</p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="country">Country</Label>
-                                <Input
-                                    id="country"
-                                    {...register("country")}
-                                    placeholder="Country"
-                                    disabled={isLoading}
-                                />
-                                {errors.country && (
-                                    <p className="text-sm text-red-500">{errors.country.message}</p>
-                                )}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="pincode">Pincode</Label>
-                                <Input
-                                    id="pincode"
-                                    {...register("pincode")}
-                                    placeholder="12345"
-                                    disabled={isLoading}
-                                />
-                                {errors.pincode && (
-                                    <p className="text-sm text-red-500">{errors.pincode.message}</p>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    <Button
-                        type="submit"
-                        className="w-full"
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Creating Business...
-                            </>
-                        ) : (
-                            "Create Business"
-                        )}
-                    </Button>
-                </form>
+                        </Button>
+                    </form>
+                </Form>
             </CardContent>
         </Card>
     );

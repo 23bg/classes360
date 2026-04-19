@@ -24,8 +24,8 @@ export const addEnquiryArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/add-enquiry/step-1.webp",
-                    alt: "Leads screen with add enquiry form",
+                    src: "/images/empty-lead.png",
+                    alt: "Leads screen empty state with add lead action",
                 },
             ],
         },
@@ -40,8 +40,8 @@ export const addEnquiryArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/add-enquiry/step-2.webp",
-                    alt: "Lead follow-up fields and notes",
+                    src: "/images/import-lead-form.png",
+                    alt: "Lead entry form for follow-up details",
                 },
             ],
         },
@@ -56,8 +56,8 @@ export const addEnquiryArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/add-enquiry/step-3.webp",
-                    alt: "Lead pipeline overview with statuses",
+                    src: "/images/Dashboard.png",
+                    alt: "Dashboard overview with lead metrics and statuses",
                 },
             ],
         },

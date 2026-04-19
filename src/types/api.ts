@@ -1,13 +1,13 @@
-export interface AppError {
+export type ApiError = {
     message: string;
-    // The backend may include other fields like a specific error code or details.
-    // Add them here as they are needed.
-}
+    code?: string;
+    details?: unknown;
+};
 
 export interface ApiResponse<T> {
     success: boolean;
-    data: T | null;
-    error?: AppError;
+    data?: T;
+    error?: ApiError;
     meta?: Record<string, unknown>;
 }
 

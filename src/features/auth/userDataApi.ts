@@ -7,8 +7,10 @@ type CreateUserInput = {
     instituteId?: string;
     role?: AppRole;
     name?: string;
+    phoneNumber?: string;
     passwordHash?: string;
     emailVerified?: boolean;
+    status?: "PENDING_VERIFICATION" | "VERIFIED_NO_PASSWORD" | "ACTIVE" | "BLOCKED";
     otpPending?: boolean;
     otpHash?: string | null;
     otpResendCount?: number;
@@ -37,8 +39,10 @@ export const userRepository = {
                 instituteId: input.instituteId,
                 role: toPrismaRole(input.role) ?? "OWNER",
                 name: input.name,
+                phoneNumber: input.phoneNumber,
                 passwordHash: input.passwordHash,
                 emailVerified: input.emailVerified ?? false,
+                status: input.status ?? "PENDING_VERIFICATION",
                 otpPending: input.otpPending ?? false,
                 otpHash: input.otpHash,
                 otpResendCount: input.otpResendCount,
@@ -53,8 +57,10 @@ export const userRepository = {
             instituteId?: string;
             role?: AppRole;
             name?: string | null;
+            phoneNumber?: string | null;
             passwordHash?: string;
             emailVerified?: boolean;
+            status?: "PENDING_VERIFICATION" | "VERIFIED_NO_PASSWORD" | "ACTIVE" | "BLOCKED";
             otpPending?: boolean;
             otpHash?: string | null;
             otpResendCount?: number;
@@ -70,8 +76,10 @@ export const userRepository = {
                 ...(input.instituteId !== undefined ? { instituteId: input.instituteId } : {}),
                 ...(input.role !== undefined ? { role: toPrismaRole(input.role) } : {}),
                 ...(input.name !== undefined ? { name: input.name } : {}),
+                ...(input.phoneNumber !== undefined ? { phoneNumber: input.phoneNumber } : {}),
                 ...(input.passwordHash !== undefined ? { passwordHash: input.passwordHash } : {}),
                 ...(input.emailVerified !== undefined ? { emailVerified: input.emailVerified } : {}),
+                ...(input.status !== undefined ? { status: input.status } : {}),
                 ...(input.otpPending !== undefined ? { otpPending: input.otpPending } : {}),
                 ...(input.otpHash !== undefined ? { otpHash: input.otpHash } : {}),
                 ...(input.otpResendCount !== undefined ? { otpResendCount: input.otpResendCount } : {}),

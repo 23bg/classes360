@@ -308,6 +308,10 @@ type InvoiceHistoryItem = {
     planCharge: number;
     usageCharge: number;
     totalAmount: number;
+    couponCode?: string | null;
+    originalAmount?: number | null;
+    discountAmount?: number | null;
+    finalAmount?: number | null;
     status: "PENDING" | "ISSUED" | "PAID" | "OVERDUE" | "VOID";
     dueDate?: string | null;
     issuedAt?: string | null;
@@ -884,12 +888,13 @@ export const fetchBillingDashboard = createAsyncThunk("dashboard/fetchBillingDas
 
 export const createBillingSubscription = createAsyncThunk(
     "dashboard/createBillingSubscription",
-    async ({ planType, interval, provider }: { planType: string; interval: string; provider?: "RAZORPAY" | "STRIPE" | null }) => {
+    async ({ planType, interval, provider, couponCode }: { planType: string; interval: string; provider?: "RAZORPAY" | "STRIPE" | null; couponCode?: string | null }) => {
         const response = await api.post(API.INTERNAL.BILLING.ROOT, {
             action: "create-subscription",
             planType,
             interval,
             provider,
+            couponCode,
         });
         return response.data?.data as BillingCheckoutSession;
     }

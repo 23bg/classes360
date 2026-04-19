@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from "@/components/ui/input-group";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
 import { submitPublicEnquiry } from "@/features/appInstitute/appInstituteSlice";
@@ -77,85 +77,85 @@ export default function PublicEnquiryForm({ slug }: PublicEnquiryFormProps) {
 				<CardTitle>Enquiry Form</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<form onSubmit={form.handleSubmit(onSubmit)}>
-					<FieldGroup>
-						<Field>
-							<FieldLabel>Name *</FieldLabel>
-							<Controller
-								name="name"
-								control={form.control}
-								render={({ field, fieldState }) => (
-									<>
+				<Form {...form}>
+					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+						<FormField
+							control={form.control}
+							name="name"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Name *</FormLabel>
+									<FormControl>
 										<Input {...field} minLength={2} maxLength={80} />
-										<FieldError errors={[fieldState.error]} />
-									</>
-								)}
-							/>
-						</Field>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/> 
 
-						<Field>
-							<FieldLabel>Phone *</FieldLabel>
-							<Controller
-								name="phone"
-								control={form.control}
-								render={({ field, fieldState }) => (
-									<>
+						<FormField
+							control={form.control}
+							name="phone"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Phone *</FormLabel>
+									<FormControl>
 										<Input {...field} inputMode="numeric" maxLength={15} />
-										<FieldDescription>10 to 15 digits only.</FieldDescription>
-										<FieldError errors={[fieldState.error]} />
-									</>
-								)}
-							/>
-						</Field>
+									</FormControl>
+									<FormDescription>10 to 15 digits only.</FormDescription>
+									<FormMessage />
+								</FormItem>
+							)}
+						/> 
 
-						<Field>
-							<FieldLabel>Email</FieldLabel>
-							<Controller
-								name="email"
-								control={form.control}
-								render={({ field, fieldState }) => (
-									<>
+						<FormField
+							control={form.control}
+							name="email"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Email</FormLabel>
+									<FormControl>
 										<Input {...field} type="email" maxLength={120} />
-										<FieldError errors={[fieldState.error]} />
-									</>
-								)}
-							/>
-						</Field>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/> 
 
-						<Field>
-							<FieldLabel>Course</FieldLabel>
-							<Controller
-								name="course"
-								control={form.control}
-								render={({ field, fieldState }) => (
-									<>
+						<FormField
+							control={form.control}
+							name="course"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Course</FormLabel>
+									<FormControl>
 										<Input {...field} maxLength={120} />
-										<FieldError errors={[fieldState.error]} />
-									</>
-								)}
-							/>
-						</Field>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/> 
 
-						<Field>
-							<FieldLabel>Message</FieldLabel>
-							<Controller
-								name="message"
-								control={form.control}
-								render={({ field, fieldState }) => (
-									<>
+						<FormField
+							control={form.control}
+							name="message"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Message</FormLabel>
+									<FormControl>
 										<InputGroup>
 											<InputGroupTextarea {...field} rows={4} maxLength={1024} />
 											<InputGroupAddon>
 												<InputGroupText>{field.value.length}/1024 characters</InputGroupText>
 											</InputGroupAddon>
 										</InputGroup>
-										<FieldError errors={[fieldState.error]} />
-									</>
-								)}
-							/>
-						</Field>
-					</FieldGroup>
-				</form>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/> 
+					</form>
+				</Form>
 			</CardContent>
 			<CardFooter>
 				<Button disabled={form.formState.isSubmitting || isSubmittingEnquiry} onClick={form.handleSubmit(onSubmit)} className="w-full">

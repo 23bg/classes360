@@ -14,9 +14,10 @@ export enum PaymentStatus {
 }
 
 export enum UserStatus {
+    PENDING_VERIFICATION = 'PENDING_VERIFICATION',
+    VERIFIED_NO_PASSWORD = 'VERIFIED_NO_PASSWORD',
     ACTIVE = 'ACTIVE',
     BLOCKED = 'BLOCKED',
-    PENDING = 'PENDING',
 }
 
 export enum BusinessRole {

@@ -14,8 +14,9 @@ export async function POST(req: NextRequest) {
         const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
         const result = await authService.signup({
+            name: input.name,
+            phoneNumber: input.phoneNumber,
             email: input.email,
-            password: input.password,
             ip,
         });
 

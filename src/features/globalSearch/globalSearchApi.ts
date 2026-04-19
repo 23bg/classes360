@@ -1,4 +1,4 @@
-import api from "@/lib/axios";
+import { apiRequest } from "@/lib/api/request";
 import { API } from "@/constants/api";
 
 export type SearchResults = {
@@ -7,7 +7,13 @@ export type SearchResults = {
     courses: Array<{ id: string; name: string; duration?: string | null }>;
 };
 
-export const getGlobalSearchResults = async (query: string) => {
-    const response = await api.get(`${API.INTERNAL.SEARCH}?q=${encodeURIComponent(query.trim())}`);
-    return (response.data?.data ?? { leads: [], students: [], courses: [] }) as SearchResults;
+export const getGlobalSearchResults = async (query: string): Promise<SearchResults> => {
+    if (!query || query.trim().length < 2) {
+        return { leads: [], students: [], courses: [] };
+    }
+
+    return apiRequest<SearchResults>({
+        url: `${API.INTERNAL.SEARCH}?q=${encodeURIComponent(query.trim())}`,
+        method: "get",
+    });
 };

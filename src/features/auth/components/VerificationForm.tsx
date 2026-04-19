@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "../hooks/useAuth";
-import { Controller, useForm } from "react-hook-form";
+import { useCompleteMfaLogin, useVerifyEmail } from "../hooks/useAuthQuery";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ROUTES from "@/constants/routes";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -17,7 +17,7 @@ import {
     CardDescription,
     CardContent,
 } from "@/components/ui/card";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
 const otpSchema = z.object({
     otp: z.string().regex(/^\d{5}$/, "OTP must be 5 digits"),
@@ -39,30 +39,33 @@ export default function VerificationForm() {
     };
 
     const router = useRouter();
-    const { verifyEmail, loading } = useAuth();
-
+    const searchParams = useSearchParams();
     const [email, setEmail] = useState<string | null>(null);
     const [mode, setMode] = useState<"emailVerification" | "mfa">("emailVerification");
 
     useEffect(() => {
-        const mfaEmail = localStorage.getItem("mfa_email");
-        if (mfaEmail) {
-            setEmail(mfaEmail);
+        const rawMode = searchParams.get("mode");
+        const rawEmail = searchParams.get("email");
+
+        if (!rawEmail || !rawMode) {
+            toast.error("Verification session is invalid. Please start again.");
+            router.push(ROUTES.AUTH.LOG_IN);
+            return;
+        }
+
+        if (rawMode === "mfa") {
             setMode("mfa");
+            setEmail(rawEmail);
             return;
         }
 
-        const verificationEmail = localStorage.getItem("verification_email");
-        if (verificationEmail) {
-            setEmail(verificationEmail);
-            setMode("emailVerification");
-            return;
-        }
+        setMode("emailVerification");
+        setEmail(rawEmail);
+    }, [router, searchParams]);
 
-        toast.error("Verification session expired. Please try again.");
-        router.push(ROUTES.AUTH.LOG_IN);
-    }, [router]);
-
+    const verifyEmailMutation = useVerifyEmail();
+    const completeMfaMutation = useCompleteMfaLogin();
+    const isLoading = verifyEmailMutation.isPending || completeMfaMutation.isPending;
     const form = useForm<OtpFormData>({
         resolver: zodResolver(otpSchema),
         mode: "onBlur",
@@ -72,42 +75,27 @@ export default function VerificationForm() {
     const onSubmit = async (data: OtpFormData) => {
         if (!email) return;
 
-        if (mode === "mfa") {
-            fetch("/api/v1/auth/mfa/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                credentials: "include",
-                body: JSON.stringify({ email, otp: data.otp }),
-            })
-                .then(async (res) => {
-                    const payload = await res.json();
-                    if (!res.ok || !payload?.success) {
-                        throw new Error(payload?.error || "Invalid OTP");
-                    }
-
-                    toast.success("MFA verification successful.");
-                    localStorage.removeItem("mfa_email");
-                    router.push(payload?.data?.redirectTo || "/overview");
-                })
-                .catch((err) => {
-                    toast.error(err instanceof Error ? err.message : "Invalid OTP. Please try again.");
-                });
-            return;
-        }
-
-        verifyEmail(
-            { email, otp: data.otp },
-            {
-                onSuccess: () => {
-                    toast.success("Email verified. Please sign in.");
-                    localStorage.removeItem("verification_email");
-                    router.push(ROUTES.AUTH.LOG_IN);
-                },
-                onError: (err: any) => {
-                    toast.error(typeof err === "string" ? err : err?.message || "Invalid OTP. Please try again.");
-                },
+        try {
+            if (mode === "mfa") {
+                const result = await completeMfaMutation.mutateAsync({ email, otp: data.otp });
+                toast.success("MFA verification successful.");
+                router.push(result?.redirectTo || "/overview");
+                return;
             }
-        );
+
+            const result = await verifyEmailMutation.mutateAsync({ email, otp: data.otp });
+
+            if (result?.status === "VERIFIED_NO_PASSWORD") {
+                toast.success("Email verified. Set your password to continue.");
+                router.push(`/forgot-password?mode=setup&email=${encodeURIComponent(email)}`);
+                return;
+            }
+
+            toast.success("Email verified. Please sign in.");
+            router.push(ROUTES.AUTH.LOG_IN);
+        } catch (err: any) {
+            toast.error(typeof err === "string" ? err : err?.message || "Invalid OTP. Please try again.");
+        }
     };
 
     if (email === null) return null;
@@ -120,22 +108,23 @@ export default function VerificationForm() {
             </CardHeader>
 
             <CardContent>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        const finalOtp = codes.join("");
-                        form.setValue("otp", finalOtp, { shouldValidate: true, shouldTouch: true });
-                        form.handleSubmit(onSubmit)();
-                    }}
-                >
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel className="block text-center">Verification Code</FieldLabel>
-                            <Controller
-                                name="otp"
-                                control={form.control}
-                                render={({ fieldState }) => (
-                                    <>
+                <Form {...form}>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            const finalOtp = codes.join("");
+                            form.setValue("otp", finalOtp, { shouldValidate: true, shouldTouch: true });
+                            form.handleSubmit(onSubmit)();
+                        }}
+                        className="space-y-6"
+                    >
+                        <FormField
+                            control={form.control}
+                            name="otp"
+                            render={({ field, fieldState }) => (
+                                <FormItem>
+                                    <FormLabel className="text-center">Verification Code</FormLabel>
+                                    <FormControl>
                                         <div className="flex justify-center gap-2">
                                             {codes.map((c, i) => (
                                                 <Input
@@ -146,25 +135,25 @@ export default function VerificationForm() {
                                                     value={c}
                                                     onChange={(e) => handleCodeChange(i, e.target.value.replace(/\D/g, ""))}
                                                     className="w-12 h-12 text-xl text-center font-semibold"
-                                                    disabled={loading}
+                                                    disabled={isLoading}
                                                 />
                                             ))}
                                         </div>
-                                        <FieldError errors={[fieldState.error]} className="text-center" />
-                                    </>
-                                )}
-                            />
-                        </Field>
+                                    </FormControl>
+                                    <FormMessage className="text-center" />
+                                </FormItem>
+                            )}
+                        />
 
                         <Button
                             type="submit"
-                            disabled={loading || form.formState.isSubmitting || codes.join("").length !== 5}
+                            disabled={isLoading || form.formState.isSubmitting || codes.join("").length !== 5}
                             className="w-full"
                         >
-                            {loading || form.formState.isSubmitting ? "Verifying..." : "Verify OTP"}
+                            {isLoading || form.formState.isSubmitting ? "Verifying..." : "Verify OTP"}
                         </Button>
-                    </FieldGroup>
-                </form>
+                    </form>
+                </Form>
             </CardContent>
         </Card>
     );

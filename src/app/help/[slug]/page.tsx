@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import HelpArticle from "@/components/help/help-article";
 import { getHelpDocBySlug, getHelpDocIndex, helpDocs } from "@/content/help/docs";
 
@@ -12,18 +13,19 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: HelpDocPageProps): Promise<Metadata> {
+    const t = await getTranslations("help");
     const { slug } = await params;
     const doc = getHelpDocBySlug(slug);
 
     if (!doc) {
         return {
-            title: "Help Article Not Found | Classes360 Help Center",
+            title: `${t("helpArticleNotFound")} | ${t("helpCenter")}`,
             robots: { index: false, follow: false },
         };
     }
 
     return {
-        title: `${doc.title} | Classes360 Help Center`,
+        title: `${doc.title} | ${t("helpCenter")}`,
         description: doc.description,
         alternates: {
             canonical: `/help/${doc.slug}`,

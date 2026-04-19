@@ -1,5 +1,7 @@
 import { getPlanPricing, isGrandfatheredSubscription, PLAN_CONFIG, PlanType } from "@/config/plans";
 import { billingRepository } from "@/features/billing/repositories/billing.repo";
+import { couponRepository } from "@/features/billing/repositories/coupon.repo";
+import { couponService } from "@/features/billing/services/coupon.service";
 import { detectBillingRegion, getRegionLabel, resolveBillingProvider } from "@/features/billing/billingRouting";
 import { getBillingProvider } from "@/features/billing/providers";
 import { subscriptionTransactionRepository } from "@/features/billing/subscriptionTransactionDataApi";
@@ -157,19 +159,51 @@ export const billingService = {
         interval: "MONTHLY" | "YEARLY";
         provider?: BillingProviderKey | null;
         invoiceId?: string | null;
+        couponCode?: string | null;
     }) {
         const context = await this.getCheckoutContext(input.instituteId, input.provider ?? null);
         const provider = input.provider ?? context.provider;
         const providerImpl = getBillingProvider(provider);
-        const quotedAmount = input.invoiceId
-            ? (await billingRepository.findInvoiceById(input.invoiceId))?.totalAmount ?? 0
-            : getQuotedPrice(input.planType, input.interval, context.region);
-        const taxes = round2(quotedAmount * context.taxRate);
-        const totalAmount = round2(quotedAmount + taxes);
+
+        const invoice = input.invoiceId ? await billingRepository.findInvoiceById(input.invoiceId) : null;
+        const quotedAmount = invoice ? invoice.totalAmount : getQuotedPrice(input.planType, input.interval, context.region);
+
+        let amount = quotedAmount;
+        let taxes = invoice ? 0 : round2(amount * context.taxRate);
+        let totalAmount = invoice ? quotedAmount : round2(amount + taxes);
+        let couponOriginalAmount: number | null = invoice?.originalAmount ?? null;
+        let couponDiscount: number | null = invoice?.discountAmount ?? null;
+        let couponFinalAmount: number | null = invoice?.finalAmount ?? null;
+
+        if (input.couponCode && !invoice) {
+            const validation = await couponService.validateCoupon({
+                instituteId: input.instituteId,
+                userId: input.userId,
+                code: input.couponCode,
+                plan: input.planType,
+                billingCycle: input.interval,
+                currency: context.currency as "INR" | "USD",
+                amount,
+            });
+
+            if (!validation.valid || !validation.coupon) {
+                throw new AppError(validation.reason ?? "Coupon validation failed", 400, "INVALID_COUPON");
+            }
+
+            const calculation = couponService.calculateDiscount({ amount, coupon: validation.coupon });
+            couponOriginalAmount = amount;
+            couponDiscount = calculation.discount;
+            couponFinalAmount = calculation.finalAmount;
+            amount = calculation.finalAmount;
+            taxes = round2(amount * context.taxRate);
+            totalAmount = round2(amount + taxes);
+        }
+
         const successUrl = provider === "STRIPE"
             ? `${getBaseUrl()}/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`
             : `${getBaseUrl()}/billing?checkout=success`;
         const cancelUrl = `${getBaseUrl()}/billing?checkout=cancelled`;
+
         const checkout = await providerImpl.createCheckoutSession({
             instituteId: input.instituteId,
             userId: input.userId,
@@ -179,7 +213,7 @@ export const billingService = {
             planType: input.planType,
             interval: input.interval,
             currency: context.currency,
-            amount: quotedAmount,
+            amount,
             taxes,
             totalAmount,
             description: input.invoiceId ? "Invoice payment" : `${input.planType} subscription`,
@@ -187,6 +221,10 @@ export const billingService = {
             cancelUrl,
             invoiceId: input.invoiceId ?? null,
             existingSubscriptionId: context.subscription.razorpaySubId ?? null,
+            couponCode: input.couponCode ?? invoice?.couponCode ?? null,
+            couponOriginalAmount,
+            couponDiscount,
+            couponFinalAmount,
         });
 
         return buildCheckoutSession({
@@ -195,11 +233,45 @@ export const billingService = {
             planType: input.planType,
             interval: input.interval,
             currency: context.currency,
-            amount: quotedAmount,
+            amount,
             taxes,
             totalAmount,
             providerCheckout: checkout,
         });
+    },
+
+    async applyCoupon(input: {
+        instituteId: string;
+        userId: string;
+        code: string;
+        plan: PlanType;
+        billingCycle: "MONTHLY" | "YEARLY";
+        currency: "INR" | "USD";
+        amount?: number;
+    }) {
+        const quotedAmount = input.amount ?? getQuotedPrice(input.plan, input.billingCycle, input.currency === "USD" ? "GLOBAL" : "IN");
+        const validation = await couponService.validateCoupon({
+            instituteId: input.instituteId,
+            userId: input.userId,
+            code: input.code,
+            plan: input.plan,
+            billingCycle: input.billingCycle,
+            currency: input.currency,
+            amount: quotedAmount,
+        });
+
+        if (!validation.valid || !validation.coupon) {
+            return { valid: false, reason: validation.reason ?? "Coupon validation failed" };
+        }
+
+        const calculation = couponService.calculateDiscount({ amount: quotedAmount, coupon: validation.coupon });
+        return {
+            valid: true,
+            coupon: validation.coupon,
+            discount: calculation.discount,
+            finalAmount: calculation.finalAmount,
+            originalAmount: quotedAmount,
+        };
     },
 
     async verifyCheckout(input: {
@@ -253,6 +325,13 @@ export const billingService = {
                     invoiceId: input.invoiceId ?? null,
                 },
             });
+        }
+
+        if (invoice?.couponCode) {
+            const coupon = await couponRepository.findByCode(invoice.couponCode);
+            if (coupon) {
+                await couponService.recordUsageForCoupon(coupon.id, input.userId ?? null, verification.providerPaymentId ?? input.checkoutSessionId ?? null);
+            }
         }
 
         await subscriptionRepository.updateByInstituteId(input.instituteId, {
@@ -310,7 +389,7 @@ export const billingService = {
         };
     },
 
-    async createOrUpdateClosedMonthInvoice(instituteId: string, runAt = new Date()) {
+    async createOrUpdateClosedMonthInvoice(instituteId: string, runAt = new Date(), coupon?: { code?: string; originalAmount?: number; discountAmount?: number; finalAmount?: number }) {
         const subscription = await subscriptionService.getSubscription(instituteId);
         const planType = toStoredPlanType(subscription.planType, subscription.userLimit);
         const pricing = getPlanPricing(planType, {
@@ -354,6 +433,10 @@ export const billingService = {
             extraAlertRate: 0,
             usageCharge,
             totalAmount,
+            couponCode: coupon?.code ?? null,
+            originalAmount: coupon?.originalAmount ?? null,
+            discountAmount: coupon?.discountAmount ?? null,
+            finalAmount: coupon?.finalAmount ?? null,
             dueDate: getDueDate(runAt),
             autopayEnabled: Boolean(subscription.autopayEnabled),
             metadata: {
@@ -395,6 +478,9 @@ export const billingService = {
                 instituteId: invoice.instituteId,
                 invoiceId: invoice.id,
                 period: `${invoice.month}-${invoice.year}`,
+                couponCode: invoice.couponCode ?? "",
+                discountAmount: invoice.discountAmount != null ? String(invoice.discountAmount) : "0",
+                finalAmount: invoice.finalAmount != null ? String(invoice.finalAmount) : String(invoice.totalAmount),
             },
         });
 

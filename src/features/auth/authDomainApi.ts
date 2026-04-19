@@ -23,8 +23,9 @@ export type VerifyOtpInput = {
 };
 
 export type SignupInput = {
+    name: string;
+    phoneNumber: string;
     email: string;
-    password: string;
     ip: string;
 };
 
@@ -42,7 +43,9 @@ export type ResetPasswordInput = {
 
 export type PasswordLoginResult = {
     mfaRequired: boolean;
-    redirectTo?: "/overview" | "/pricing" | "/onboarding";
+    redirectTo?: string;
+    status?: "PENDING_VERIFICATION" | "VERIFIED_NO_PASSWORD" | "ACTIVE";
+    message?: string;
 };
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
@@ -60,6 +63,38 @@ const resolvePostLoginRedirect = (input: {
     return input.subscriptionStatus === "ACTIVE" || input.subscriptionStatus === "TRIAL"
         ? "/overview"
         : "/pricing";
+};
+
+const isPrismaStatusFieldError = (error: unknown): boolean => {
+    const message = error instanceof Error ? error.message : String(error);
+    return /Unknown arg.*status|Field 'status' doesn't exist|Field `status`.*unknown/i.test(message);
+};
+
+const safeCreateUser = async (input: Parameters<typeof userRepository.create>[0]) => {
+    try {
+        return await userRepository.create(input);
+    } catch (error) {
+        if (input.status !== undefined && isPrismaStatusFieldError(error)) {
+            const { status, ...rest } = input;
+            return await userRepository.create(rest as Parameters<typeof userRepository.create>[0]);
+        }
+        throw error;
+    }
+};
+
+const safeUpdateUser = async (
+    email: string,
+    input: Parameters<typeof userRepository.updateByEmail>[1]
+) => {
+    try {
+        return await userRepository.updateByEmail(email, input);
+    } catch (error) {
+        if (input.status !== undefined && isPrismaStatusFieldError(error)) {
+            const { status, ...rest } = input;
+            return await userRepository.updateByEmail(email, rest as Parameters<typeof userRepository.updateByEmail>[1]);
+        }
+        throw error;
+    }
 };
 
 const sendOtpForPurpose = async (input: RequestOtpInput): Promise<{ expiresAt: number }> => {
@@ -120,35 +155,44 @@ const sendOtpForPurpose = async (input: RequestOtpInput): Promise<{ expiresAt: n
 export const authService = {
     async signup(input: SignupInput): Promise<{ requiresEmailVerification: true; expiresAt: number }> {
         const email = normalizeEmail(input.email);
-        const password = String(input.password ?? "");
+        const name = input.name.trim();
+        const phoneNumber = input.phoneNumber.trim();
 
         if (!email.includes("@")) {
             throw new AppError("Invalid email", 400, "INVALID_EMAIL");
         }
 
-        if (password.length < 8) {
-            throw new AppError("Password must be at least 8 characters", 400, "PASSWORD_TOO_SHORT");
+        if (!name) {
+            throw new AppError("Name is required", 400, "NAME_REQUIRED");
+        }
+
+        if (!phoneNumber) {
+            throw new AppError("Phone number is required", 400, "PHONE_REQUIRED");
         }
 
         const existing = await userRepository.findByEmail(email);
-        if (existing?.passwordHash) {
+        if (existing && existing.status === "ACTIVE") {
             throw new AppError("Email already registered", 409, "EMAIL_ALREADY_REGISTERED");
         }
 
-        const passwordHash = await bcrypt.hash(password, 12);
         if (!existing) {
-            await userRepository.create({
+            await safeCreateUser({
                 email,
-                passwordHash,
+                name,
+                phoneNumber,
                 emailVerified: false,
+                status: "PENDING_VERIFICATION",
                 otpPending: false,
                 otpResendCount: 0,
                 otpAttempts: 0,
+                otpExpiresAt: null,
             });
         } else {
-            await userRepository.updateByEmail(email, {
-                passwordHash,
+            await safeUpdateUser(email, {
+                name,
+                phoneNumber,
                 emailVerified: false,
+                status: "PENDING_VERIFICATION",
             });
         }
 
@@ -168,7 +212,7 @@ export const authService = {
         return sendOtpForPurpose(input);
     },
 
-    async verifyOtp(input: VerifyOtpInput): Promise<{ verified: true }> {
+    async verifyOtp(input: VerifyOtpInput): Promise<{ verified: true; status?: "PENDING_VERIFICATION" | "VERIFIED_NO_PASSWORD" | "ACTIVE" }> {
         const email = normalizeEmail(input.email);
         const valid = await otpRepository.verifyOtp(email, input.otp, input.purpose);
 
@@ -179,6 +223,20 @@ export const authService = {
         await otpRepository.consumeOtp(email, {
             markEmailVerified: input.purpose === OtpPurpose.VERIFY_EMAIL,
         });
+
+        if (input.purpose === OtpPurpose.VERIFY_EMAIL) {
+            const user = await userRepository.findByEmail(email);
+            if (!user) {
+                throw new AppError("Account not found", 404, "USER_NOT_FOUND");
+            }
+
+            const nextStatus = user.passwordHash ? "ACTIVE" : "VERIFIED_NO_PASSWORD";
+            await safeUpdateUser(email, {
+                status: nextStatus,
+            });
+
+            return { verified: true, status: nextStatus };
+        }
 
         return { verified: true };
     },
@@ -195,17 +253,41 @@ export const authService = {
             mfaEnabled?: boolean;
         }) | null;
 
-        if (!user || !user.passwordHash) {
-            throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
+        if (!user) {
+            throw new AppError("User not found", 404, "USER_NOT_FOUND");
+        }
+
+        const status = user.status ?? (user.emailVerified ? (user.passwordHash ? "ACTIVE" : "VERIFIED_NO_PASSWORD") : "PENDING_VERIFICATION");
+
+        if (status === "PENDING_VERIFICATION") {
+            return {
+                mfaRequired: false,
+                redirectTo: "/verification",
+                status,
+                message: "Please verify your email before logging in.",
+            };
+        }
+
+        if (status === "VERIFIED_NO_PASSWORD") {
+            return {
+                mfaRequired: false,
+                redirectTo: "/forgot-password?mode=setup&email=" + encodeURIComponent(email),
+                status,
+                message: "You haven’t set your password yet. Please create one.",
+            };
+        }
+
+        if (status !== "ACTIVE") {
+            throw new AppError("Account cannot sign in", 403, "ACCOUNT_INACTIVE");
+        }
+
+        if (!user.passwordHash) {
+            throw new AppError("Password is not set for this account", 403, "PASSWORD_NOT_SET");
         }
 
         const validPassword = await bcrypt.compare(password, user.passwordHash);
         if (!validPassword) {
             throw new AppError("Invalid email or password", 401, "INVALID_CREDENTIALS");
-        }
-
-        if (!user.emailVerified) {
-            throw new AppError("Please verify your email before logging in", 403, "EMAIL_NOT_VERIFIED");
         }
 
         if (Boolean(user.mfaEnabled)) {
@@ -229,6 +311,7 @@ export const authService = {
                 isOnboarded: issued.access.isOnboarded,
                 subscriptionStatus: issued.access.subscriptionStatus,
             }),
+            status,
         };
     },
 
@@ -280,7 +363,7 @@ export const authService = {
         }
 
         const user = await userRepository.findByEmail(email);
-        if (!user || !user.passwordHash) {
+        if (!user) {
             throw new AppError("Account not found", 404, "USER_NOT_FOUND");
         }
 
@@ -290,8 +373,10 @@ export const authService = {
         }
 
         const newPasswordHash = await bcrypt.hash(input.newPassword, 12);
-        await userRepository.updateByEmail(email, {
+        await safeUpdateUser(email, {
             passwordHash: newPasswordHash,
+            emailVerified: true,
+            status: "ACTIVE",
         });
         await otpRepository.consumeOtp(email);
 

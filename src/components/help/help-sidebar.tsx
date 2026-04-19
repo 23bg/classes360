@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { getHelpDocsByCategory } from "@/content/help/docs";
 
 export default function HelpSidebar() {
+    const t = useTranslations("help");
     const pathname = usePathname();
     const groups = getHelpDocsByCategory();
 
     return (
         <aside className="w-full rounded-xl border bg-card p-4 md:sticky md:top-20 md:max-h-[calc(100vh-6rem)] md:overflow-y-auto">
-            <h2 className="mb-4 text-sm font-semibold tracking-wide text-muted-foreground">Documentation</h2>
+            <h2 className="mb-4 text-sm font-semibold tracking-wide text-muted-foreground">{t("documentation")}</h2>
 
             <div className="space-y-5">
                 {groups.map((group) => (

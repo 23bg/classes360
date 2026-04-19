@@ -119,7 +119,7 @@ export function LogoUploader() {
 
   return (
     <div>
-      <input type="file" onChange={handleFileChange} disabled={isLoading} />
+      <Input type="file" onChange={handleFileChange} disabled={isLoading} />
       {isLoading && <p>Uploading...</p>}
       {error && <p>Error: {error.message}</p>}
     </div>

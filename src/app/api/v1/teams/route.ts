@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { readSessionFromCookie } from "@/lib/auth/auth";
 import { canWriteInstituteData } from "@/lib/auth/permissions";
 import { teamService } from "@/features/team/teamApi";
 import { toAppError } from "@/lib/utils/error";
+
+const createTeamMemberSchema = z.object({
+    email: z.string().trim().max(120).email(),
+    name: z.string().trim().min(2).max(80).optional(),
+    role: z.enum(["MANAGER", "VIEWER"]),
+}).strict();
 
 export async function GET() {
     try {
@@ -42,7 +49,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const body = (await req.json()) as { email: string; name?: string; role: "MANAGER" | "VIEWER" };
+        const body = createTeamMemberSchema.parse(await req.json());
         const data = await teamService.createMember(session.instituteId, session.role, body);
         return NextResponse.json({ success: true, data });
     } catch (error) {

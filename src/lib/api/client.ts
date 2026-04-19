@@ -1,76 +1,62 @@
- import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { API } from "@/constants/api";
 
-const DEFAULT_BASE_URL = '/api/v1';
-
-const resolveBaseURL = (): string => {
-    const configured = process.env.NEXT_PUBLIC_API_URL?.trim();
-    if (!configured) {
-        return DEFAULT_BASE_URL;
-    }
-
-    const normalized = configured.replace(/\/+$/, '');
-
-    // In the browser, keep auth/data requests same-origin to avoid CORS/network errors.
-    if (typeof window !== 'undefined') {
-        if (normalized.startsWith('/')) {
-            return normalized;
-        }
-
-        try {
-            const parsed = new URL(normalized, window.location.origin);
-            if (parsed.origin !== window.location.origin) {
-                return DEFAULT_BASE_URL;
-            }
-
-            return parsed.pathname.replace(/\/+$/, '') || DEFAULT_BASE_URL;
-        } catch {
-            return DEFAULT_BASE_URL;
-        }
-    }
-
-    return normalized;
-};
-
-const baseURL = resolveBaseURL();
-
-export const api: AxiosInstance = axios.create({
-    baseURL,
-    withCredentials: true, // Include cookies in requests
+const api = axios.create({
+    baseURL: API.BASE_V1,
     headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
     },
+    withCredentials: true,
+    timeout: 10000,
 });
 
-// Request interceptor: Add auth token if needed (mostly in HttpOnly cookies)
-api.interceptors.request.use(
-    (config) => {
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+interface RetryableAxiosRequestConfig extends InternalAxiosRequestConfig {
+    _retry?: boolean;
+}
 
-// Response interceptor: Handle 401 and token refresh
+let isRefreshing = false;
+let refreshQueue: Array<{
+    resolve: (value?: unknown) => void;
+    reject: (reason?: unknown) => void;
+}> = [];
+
+const processRefreshQueue = (error: Error | null) => {
+    refreshQueue.forEach((promise) => {
+        if (error) {
+            promise.reject(error);
+        } else {
+            promise.resolve(undefined);
+        }
+    });
+    refreshQueue = [];
+};
+
 api.interceptors.response.use(
     (response) => response,
-    async (error) => {
-        const originalRequest = error.config;
+    async (error: AxiosError) => {
+        const originalRequest = error.config as RetryableAxiosRequestConfig | undefined;
 
-        // If 401 and not already retried, attempt refresh
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    refreshQueue.push({ resolve, reject });
+                })
+                    .then(() => api(originalRequest))
+                    .catch((refreshError) => Promise.reject(refreshError));
+            }
+
             originalRequest._retry = true;
+            isRefreshing = true;
 
             try {
-                // Attempt to refresh the token
-                await axios.post(`${baseURL}/auth/refresh`, {}, { withCredentials: true });
-
-                // Retry original request
+                await api.post(API.AUTH.REFRESH_TOKEN, {});
+                processRefreshQueue(null);
                 return api(originalRequest);
             } catch (refreshError) {
-                // Redirect to login on refresh failure
-                if (typeof window !== 'undefined') {
-                    window.location.href = '/login';
-                }
+                processRefreshQueue(refreshError as Error);
                 return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
             }
         }
 

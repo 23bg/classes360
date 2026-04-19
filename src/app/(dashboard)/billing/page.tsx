@@ -6,8 +6,11 @@ import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, BadgeCheck, CreditCard, Globe2, Loader2, ShieldCheck, Sparkles, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import api from "@/lib/axios";
+import { API } from "@/constants/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { getPlanPricing, PLAN_CONFIG, PlanType, PricingVersion } from "@/config/plans";
 import type { BillingInterval } from "@/features/subscription/subscriptionApi";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
@@ -31,6 +34,10 @@ type BillingCheckoutSession = {
     amount: number;
     taxes: number;
     totalAmount: number;
+    couponCode?: string | null;
+    couponOriginalAmount?: number | null;
+    couponDiscount?: number | null;
+    couponFinalAmount?: number | null;
     checkoutSessionId?: string | null;
     providerSubscriptionId?: string | null;
     providerPaymentId?: string | null;
@@ -111,6 +118,16 @@ export default function BillingPage() {
     });
     const [retryingInvoiceId, setRetryingInvoiceId] = useState<string | null>(null);
     const [manualRecoveryHandled, setManualRecoveryHandled] = useState(false);
+    const [couponVisible, setCouponVisible] = useState(false);
+    const [couponCode, setCouponCode] = useState("");
+    const [couponError, setCouponError] = useState<string | null>(null);
+    const [couponResult, setCouponResult] = useState<{
+        code: string;
+        discount: number;
+        finalAmount: number;
+        originalAmount: number;
+        message: string;
+    } | null>(null);
 
     useEffect(() => {
         void dispatch(fetchBillingDashboard());
@@ -133,6 +150,14 @@ export default function BillingPage() {
 
     const selectedPricingVersion: PricingVersion = (summary?.pricingVersion as PricingVersion | undefined) ?? "CURRENT";
     const quoteCurrency = checkoutContext?.currency ?? (selectedProvider === "STRIPE" ? "USD" : "INR");
+
+    useEffect(() => {
+        setCouponResult(null);
+        setCouponError(null);
+        setCouponCode("");
+        setCouponVisible(false);
+    }, [selectedPlan, selectedInterval, quoteCurrency]);
+
     const quotedPrice = useMemo(
         () => getQuotedPrice(selectedPlan, selectedInterval, quoteCurrency, selectedPricingVersion),
         [quoteCurrency, selectedInterval, selectedPlan, selectedPricingVersion]
@@ -208,6 +233,7 @@ export default function BillingPage() {
                         planType: payload.planType,
                         interval: payload.interval,
                         provider: payload.provider ?? undefined,
+                        couponCode: couponResult?.code ?? undefined,
                     })
                 ).unwrap();
 
@@ -219,6 +245,46 @@ export default function BillingPage() {
         } catch (error: any) {
             setCheckoutState({ status: "error", message: error?.data?.error?.message ?? error?.message ?? "Unable to start checkout" });
             toast.error(error?.data?.error?.message ?? error?.message ?? "Unable to start checkout");
+        }
+    };
+
+    const applyCouponCode = async () => {
+        if (!couponCode.trim()) {
+            setCouponError("Enter a coupon code to apply.");
+            return;
+        }
+
+        setCouponError(null);
+        try {
+            const response = await api.post<{ success: boolean; data?: { valid: boolean; discount: number; finalAmount: number; originalAmount: number; coupon: { code: string } }; error?: { message: string } }>(
+                API.INTERNAL.BILLING.APPLY_COUPON,
+                {
+                    code: couponCode,
+                    planType: selectedPlan,
+                    interval: selectedInterval,
+                    currency: quoteCurrency,
+                }
+            );
+
+            if (!response.data?.success || !response.data.data?.valid) {
+                setCouponResult(null);
+                setCouponError(response.data?.error?.message ?? "Coupon is not valid.");
+                return;
+            }
+
+            const payload = response.data.data;
+            setCouponResult({
+                code: payload.coupon.code,
+                discount: payload.discount,
+                finalAmount: payload.finalAmount,
+                originalAmount: payload.originalAmount,
+                message: "Coupon applied successfully.",
+            });
+            toast.success("Coupon applied.");
+        } catch (error: any) {
+            setCouponResult(null);
+            setCouponError(error?.response?.data?.error?.message ?? error?.message ?? "Unable to apply coupon.");
+            toast.error(error?.response?.data?.error?.message ?? error?.message ?? "Unable to apply coupon.");
         }
     };
 
@@ -271,6 +337,9 @@ export default function BillingPage() {
         : getPlanPricing(selectedPlan, { version: selectedPricingVersion })[selectedInterval === "YEARLY" ? "yearly" : "monthly"];
     const orderTaxAmount = orderPlanPrice * (checkoutContext?.taxRate ?? 0);
     const orderTotal = orderPlanPrice + orderTaxAmount;
+    const couponSubtotal = couponResult?.finalAmount ?? orderPlanPrice;
+    const couponTaxAmount = couponResult ? couponSubtotal * (checkoutContext?.taxRate ?? 0) : orderTaxAmount;
+    const couponTotal = couponSubtotal + couponTaxAmount;
 
     if (loading) {
         return (
@@ -492,6 +561,40 @@ export default function BillingPage() {
                                 </Badge>
                             </div>
 
+                            <div className="rounded-2xl border border-white/10 bg-slate-950/30 p-4 text-sm text-white/90 shadow-sm">
+                                {couponVisible ? (
+                                    <div className="space-y-3">
+                                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                            <Input
+                                                type="text"
+                                                value={couponCode}
+                                                onChange={(event) => setCouponCode(event.target.value)}
+                                                placeholder="Enter coupon code"
+                                                className="w-full rounded-md border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                                            />
+                                            <Button size="sm" onClick={applyCouponCode} disabled={!couponCode.trim() || isBusy}>
+                                                Apply
+                                            </Button>
+                                        </div>
+                                        {couponError ? <p className="text-sm text-red-300">{couponError}</p> : null}
+                                        {couponResult ? (
+                                            <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-100">
+                                                <p className="font-medium">Coupon applied: {couponResult.code}</p>
+                                                <p>{couponResult.message}</p>
+                                            </div>
+                                        ) : null}
+                                    </div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        className="text-sm font-medium text-white/80 hover:text-white"
+                                        onClick={() => setCouponVisible(true)}
+                                    >
+                                        Have a code?
+                                    </button>
+                                )}
+                            </div>
+
                             <div className="mt-5 space-y-3 text-sm">
                                 <div className="flex items-center justify-between">
                                     <span className="text-white/65">Billing cycle</span>
@@ -501,13 +604,19 @@ export default function BillingPage() {
                                     <span className="text-white/65">Plan price</span>
                                     <span className="font-medium">{formatMoney(orderPlanPrice, quoteCurrency)}</span>
                                 </div>
+                                {couponResult ? (
+                                    <div className="flex items-center justify-between text-emerald-200">
+                                        <span className="text-white/80">Discount ({couponResult.code})</span>
+                                        <span className="font-medium">-{formatMoney(couponResult.discount, quoteCurrency)}</span>
+                                    </div>
+                                ) : null}
                                 <div className="flex items-center justify-between">
                                     <span className="text-white/65">Taxes</span>
-                                    <span className="font-medium">{formatMoney(orderTaxAmount, quoteCurrency)}</span>
+                                    <span className="font-medium">{formatMoney(couponTaxAmount, quoteCurrency)}</span>
                                 </div>
                                 <div className="flex items-center justify-between border-t border-white/10 pt-3 text-base">
                                     <span className="font-medium">Total</span>
-                                    <span className="font-semibold">{formatMoney(orderTotal, quoteCurrency)}</span>
+                                    <span className="font-semibold">{formatMoney(couponTotal, quoteCurrency)}</span>
                                 </div>
                             </div>
 
@@ -585,6 +694,9 @@ export default function BillingPage() {
                             paidAt?: string | null;
                             paymentLinkUrl?: string | null;
                             downloadUrl?: string | null;
+                            couponCode?: string | null;
+                            discountAmount?: number | null;
+                            originalAmount?: number | null;
                         }) => (
                             <div key={invoice.id} className="rounded-2xl border bg-background p-4 shadow-sm">
                                 <div className="flex items-center justify-between gap-3">
@@ -604,6 +716,15 @@ export default function BillingPage() {
                                     <p>Usage: {formatMoney(invoice.usageCharge, quoteCurrency)}</p>
                                     <p className="font-semibold text-foreground">Total: {formatMoney(invoice.totalAmount, quoteCurrency)}</p>
                                 </div>
+                                {invoice.discountAmount ? (
+                                    <div className="mt-2 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-900 dark:border-emerald-400/20 dark:bg-emerald-900/10 dark:text-emerald-100">
+                                        <p className="font-medium">Coupon: {invoice.couponCode}</p>
+                                        <p>Discount: {formatMoney(invoice.discountAmount, quoteCurrency)}</p>
+                                        {invoice.originalAmount != null ? (
+                                            <p>Subtotal: {formatMoney(invoice.originalAmount, quoteCurrency)}</p>
+                                        ) : null}
+                                    </div>
+                                ) : null}
 
                                 <div className="mt-4 flex flex-wrap gap-2">
                                     {invoice.paymentLinkUrl ? (

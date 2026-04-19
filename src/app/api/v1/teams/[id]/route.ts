@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import { readSessionFromCookie } from "@/lib/auth/auth";
 import { canWriteInstituteData } from "@/lib/auth/permissions";
 import { teamService } from "@/features/team/teamApi";
@@ -7,6 +8,10 @@ import { toAppError } from "@/lib/utils/error";
 type RouteContext = {
     params: Promise<{ id: string }>;
 };
+
+const updateTeamMemberRoleSchema = z.object({
+    role: z.enum(["MANAGER", "VIEWER"]),
+}).strict();
 
 export async function PATCH(req: NextRequest, context: RouteContext) {
     try {
@@ -26,7 +31,7 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
         }
 
         const { id } = await context.params;
-        const body = (await req.json()) as { role: "MANAGER" | "VIEWER" };
+        const body = updateTeamMemberRoleSchema.parse(await req.json());
         const data = await teamService.updateMemberRole(session.instituteId, session.role, session.userId, id, body.role);
         return NextResponse.json({ success: true, data });
     } catch (error) {

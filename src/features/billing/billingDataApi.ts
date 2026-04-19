@@ -55,6 +55,10 @@ export const billingRepository = {
         dueDate: Date;
         autopayEnabled: boolean;
         metadata?: Record<string, unknown>;
+        couponCode?: string | null;
+        originalAmount?: number | null;
+        discountAmount?: number | null;
+        finalAmount?: number | null;
     }) =>
         prisma.billingInvoice.upsert({
             where: {
@@ -79,6 +83,10 @@ export const billingRepository = {
                 extraAlertRate: input.extraAlertRate,
                 usageCharge: input.usageCharge,
                 totalAmount: input.totalAmount,
+                couponCode: input.couponCode ?? null,
+                originalAmount: input.originalAmount ?? null,
+                discountAmount: input.discountAmount ?? null,
+                finalAmount: input.finalAmount ?? null,
                 status: "PENDING",
                 issuedAt: new Date(),
                 dueDate: input.dueDate,
@@ -97,6 +105,10 @@ export const billingRepository = {
                 extraAlertRate: input.extraAlertRate,
                 usageCharge: input.usageCharge,
                 totalAmount: input.totalAmount,
+                couponCode: input.couponCode ?? null,
+                originalAmount: input.originalAmount ?? null,
+                discountAmount: input.discountAmount ?? null,
+                finalAmount: input.finalAmount ?? null,
                 dueDate: input.dueDate,
                 autopayEnabled: input.autopayEnabled,
                 metadata: (input.metadata ?? null) as Prisma.InputJsonValue,

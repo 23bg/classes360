@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PLAN_CONFIG, type PlanType } from "@/config/plans";
+import Input from "@/components/ui/input";
 
 const PER_USER_COST = 250; // INR per extra user per month (assumption)
 const WHATSAPP_PACK_SIZE = 1000;
@@ -60,13 +61,13 @@ export default function CustomPricingCard() {
 
                     <label className="flex flex-col">
                         <span className="text-xs font-medium text-muted-foreground">Number of users</span>
-                        <input type="number" min={1} value={users} onChange={(e) => setUsers(Number(e.target.value) || 0)} className="mt-1 rounded-md border px-2 py-1" />
+                        <Input type="number" min={1} value={users} onChange={(e) => setUsers(Number(e.target.value) || 0)} className="mt-1 rounded-md border px-2 py-1" />
                         <span className="text-xs text-muted-foreground mt-1">Included: {PLAN_CONFIG[selectedPlan].userLimit ?? "Unlimited"}</span>
                     </label>
 
                     <label className="flex flex-col">
                         <span className="text-xs font-medium text-muted-foreground">WhatsApp messages / month</span>
-                        <input type="number" min={0} value={messages} onChange={(e) => setMessages(Number(e.target.value) || 0)} className="mt-1 rounded-md border px-2 py-1" />
+                        <Input type="number" min={0} value={messages} onChange={(e) => setMessages(Number(e.target.value) || 0)} className="mt-1 rounded-md border px-2 py-1" />
                         <span className="text-xs text-muted-foreground mt-1">Included: {PLAN_CONFIG[selectedPlan].whatsappMonthlyLimit ?? "Pay-as-you-go"}</span>
                     </label>
                 </div>
@@ -75,7 +76,7 @@ export default function CustomPricingCard() {
                     <div className="space-y-1">
                         <label className="flex flex-col">
                             <span className="text-xs font-medium text-muted-foreground">Base monthly (enter your expected base)</span>
-                            <input type="number" min={0} value={customBase} onChange={(e) => setCustomBase(Number(e.target.value) || 0)} className="mt-1 rounded-md border px-2 py-1" />
+                            <Input type="number" min={0} value={customBase} onChange={(e) => setCustomBase(Number(e.target.value) || 0)} className="mt-1 rounded-md border px-2 py-1" />
                         </label>
                         <p className="text-xs text-muted-foreground">Enterprise is custom—enter an initial base or contact sales for a quote.</p>
                     </div>

@@ -98,7 +98,7 @@ function ImageUploadField({
       </div>
 
       {/* Upload input */}
-      <input
+      <Input
         type="file"
         accept="image/*"
         onChange={handleFileSelect}
@@ -156,7 +156,7 @@ export function InstituteProfileForm({ initialData, onSubmit }: InstituteProfile
       {/* Name field */}
       <div>
         <label className="block text-sm font-medium">Institute Name</label>
-        <input
+        <Input
           type="text"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}

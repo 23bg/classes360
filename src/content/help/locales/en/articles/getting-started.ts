@@ -24,8 +24,8 @@ export const gettingStartedArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/getting-started/step-1.webp",
-                    alt: "Onboarding form with institute details",
+                    src: "/images/onboarding-form.png",
+                    alt: "Institute onboarding form",
                 },
             ],
         },
@@ -40,8 +40,8 @@ export const gettingStartedArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/getting-started/step-2.webp",
-                    alt: "Course and batch setup screen",
+                    src: "/images/add-coures-form.png",
+                    alt: "Course creation form",
                 },
             ],
         },
@@ -56,8 +56,8 @@ export const gettingStartedArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/getting-started/step-3.webp",
-                    alt: "Lead pipeline with status updates",
+                    src: "/images/Dashboard.png",
+                    alt: "Dashboard overview with lead metrics",
                 },
             ],
         },

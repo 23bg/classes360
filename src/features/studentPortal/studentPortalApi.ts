@@ -1,19 +1,15 @@
 import { API } from "@/constants/api";
-import { apiGet, apiPost } from "@/lib/apiService";
+import { apiRequest } from "@/lib/api/request";
 import type { PortalData } from "@/features/studentPortal/types";
 
-export const getStudentPortal = async () => {
-    return await apiGet<PortalData>(API.INTERNAL.STUDENT_PORTAL.ME);
-};
+export const getStudentPortal = async () =>
+    apiRequest<PortalData>({ url: API.INTERNAL.STUDENT_PORTAL.ME, method: "get" });
 
-export const loginStudentPortal = async (payload: { identifier: string; password: string }) => {
-    await apiPost(API.INTERNAL.STUDENT_AUTH.LOGIN, payload);
-};
+export const loginStudentPortal = async (payload: { identifier: string; password: string }) =>
+    apiRequest<void>({ url: API.INTERNAL.STUDENT_AUTH.LOGIN, method: "post", data: payload });
 
-export const logoutStudentPortal = async () => {
-    await apiPost(API.INTERNAL.STUDENT_AUTH.LOGOUT, {});
-};
+export const logoutStudentPortal = async () =>
+    apiRequest<void>({ url: API.INTERNAL.STUDENT_AUTH.LOGOUT, method: "post", data: {} });
 
-export const logoutUser = async () => {
-    await apiPost(API.AUTH.LOG_OUT, {});
-};
+export const logoutUser = async () =>
+    apiRequest<void>({ url: API.AUTH.LOG_OUT, method: "post", data: {} });

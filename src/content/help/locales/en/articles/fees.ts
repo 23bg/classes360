@@ -20,8 +20,8 @@ export const feesArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/fees/step-1.webp",
-                    alt: "Fee plan creation with installment setup",
+                    src: "/images/empty-fee-managament.png",
+                    alt: "Fee management empty state with fee plan action",
                 },
             ],
         },
@@ -36,8 +36,8 @@ export const feesArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/fees/step-2.webp",
-                    alt: "Payment entry screen for student fee",
+                    src: "/images/empty-payment-list.png",
+                    alt: "Payment list empty state for fee records",
                 },
             ],
         },
@@ -52,8 +52,8 @@ export const feesArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/fees/step-3.webp",
-                    alt: "Outstanding dues view in fees module",
+                    src: "/images/empty-fee-managament.png",
+                    alt: "Fee management view showing pending dues",
                 },
             ],
         },

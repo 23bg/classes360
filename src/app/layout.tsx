@@ -6,8 +6,7 @@ import { ThemeProvider } from "@/providers/theme-provider";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
-import PWARegistration from "@/components/pwa/PWARegistration";
-
+import PWARegistration from "@/components/pwa/PWARegistration";import { QueryProvider } from "@/providers/QueryProvider";
 
 export const inter = Inter({
   subsets: ["latin"],
@@ -94,16 +93,18 @@ export default async function RootLayout({
       <body className="bg-background text-foreground antialiased font-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider locale={locale} messages={messages}>
-            <NextTopLoader showSpinner={false} color="var(--color-primary)" shadow={false} />
-            <PWARegistration />
-            {children}
-            <Toaster
-              duration={3000}
-              position="bottom-right"
-              richColors
-              expand
-              offset={{ bottom: "1.5rem" }}
-            />
+            <QueryProvider>
+              <NextTopLoader showSpinner={false} color="var(--color-primary)" shadow={false} />
+              <PWARegistration />
+              {children}
+              <Toaster
+                duration={3000}
+                position="top-center"
+                richColors
+                expand
+                offset={{ bottom: "1.5rem" }}
+              />
+            </QueryProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

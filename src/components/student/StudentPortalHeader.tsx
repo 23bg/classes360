@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
     DropdownMenu,
@@ -11,8 +11,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
-import { fetchStudentPortal, studentPortalLogout } from "@/features/studentPortal/studentPortalSlice";
+import { useStudentPortal, useStudentPortalLogout } from "@/features/studentPortal/api";
 
 const navItems = [
     { label: "Dashboard", href: "/student" },
@@ -32,13 +31,9 @@ const getInitials = (value: string) =>
 
 export default function StudentPortalHeader() {
     const pathname = usePathname();
-    const dispatch = useAppDispatch();
-    const data = useAppSelector((state) => state.studentPortal.data);
-    const authLoading = useAppSelector((state) => state.studentPortal.authLoading);
-
-    useEffect(() => {
-        void dispatch(fetchStudentPortal());
-    }, [dispatch]);
+    const { data } = useStudentPortal();
+    const logoutMutation = useStudentPortalLogout();
+    const authLoading = logoutMutation.isPending;
 
     const instituteName = data?.student?.institute?.name?.trim() || "Institute";
     const instituteLogo = data?.student?.institute?.logo || data?.student?.institute?.logoUrl || "";
@@ -49,7 +44,7 @@ export default function StudentPortalHeader() {
 
     const logout = async () => {
         try {
-            await dispatch(studentPortalLogout()).unwrap();
+            await logoutMutation.mutateAsync();
         } finally {
             window.location.href = "/student-login";
         }

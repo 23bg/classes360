@@ -41,9 +41,14 @@ export const createStripeCheckoutSession = async (input: {
     currency: string;
     email: string;
     instituteId: string;
+    userId?: string;
     planType: string;
     interval: string;
     invoiceId?: string | null;
+    couponCode?: string | null;
+    couponOriginalAmount?: number | null;
+    couponDiscount?: number | null;
+    couponFinalAmount?: number | null;
 }) => {
     const params = new URLSearchParams();
     params.set("mode", input.mode);
@@ -53,12 +58,28 @@ export const createStripeCheckoutSession = async (input: {
     params.set("billing_address_collection", "auto");
     params.set("client_reference_id", input.instituteId);
     params.set("metadata[instituteId]", input.instituteId);
+    if (input.userId) {
+        params.set("metadata[userId]", input.userId);
+    }
     params.set("metadata[planType]", input.planType);
     params.set("metadata[interval]", input.interval);
     params.set("metadata[currency]", input.currency);
 
     if (input.invoiceId) {
         params.set("metadata[invoiceId]", input.invoiceId);
+    }
+
+    if (input.couponCode) {
+        params.set("metadata[couponCode]", input.couponCode);
+    }
+    if (typeof input.couponOriginalAmount === "number") {
+        params.set("metadata[couponOriginalAmount]", String(input.couponOriginalAmount));
+    }
+    if (typeof input.couponDiscount === "number") {
+        params.set("metadata[couponDiscount]", String(input.couponDiscount));
+    }
+    if (typeof input.couponFinalAmount === "number") {
+        params.set("metadata[couponFinalAmount]", String(input.couponFinalAmount));
     }
 
     if (input.mode === "subscription") {
@@ -69,8 +90,23 @@ export const createStripeCheckoutSession = async (input: {
         params.set("line_items[0][price]", input.priceId);
         params.set("line_items[0][quantity]", "1");
         params.set("subscription_data[metadata][instituteId]", input.instituteId);
+        if (input.userId) {
+            params.set("subscription_data[metadata][userId]", input.userId);
+        }
         params.set("subscription_data[metadata][planType]", input.planType);
         params.set("subscription_data[metadata][interval]", input.interval);
+        if (input.couponCode) {
+            params.set("subscription_data[metadata][couponCode]", input.couponCode);
+        }
+        if (typeof input.couponDiscount === "number") {
+            params.set("subscription_data[metadata][couponDiscount]", String(input.couponDiscount));
+        }
+        if (typeof input.couponFinalAmount === "number") {
+            params.set("subscription_data[metadata][couponFinalAmount]", String(input.couponFinalAmount));
+        }
+        if (typeof input.couponOriginalAmount === "number") {
+            params.set("subscription_data[metadata][couponOriginalAmount]", String(input.couponOriginalAmount));
+        }
     } else {
         if (!input.amount) {
             throw new AppError("Missing Stripe amount", 500, "STRIPE_AMOUNT_MISSING");

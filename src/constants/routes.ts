@@ -27,6 +27,7 @@ const ROUTES = {
 		LOG_IN: "/login",
 		SIGN_UP: "/signup",
 		VERIFICATION: "/verification",
+		FORGOT_PASSWORD: "/forgot-password",
 	},
 	PRICING: "/pricing",
 	FEATURES: "/features",

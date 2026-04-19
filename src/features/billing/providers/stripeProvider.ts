@@ -2,6 +2,8 @@ import { env } from "@/lib/config/env";
 import { AppError } from "@/lib/utils/error";
 import { assertStripeReady, createStripeCheckoutSession, retrieveStripeCheckoutSession, verifyStripeWebhookSignature } from "@/lib/billing/stripe";
 import { detectBillingRegion, getRegionLabel } from "@/features/billing/billingRouting";
+import { couponService } from "@/features/billing/services/coupon.service";
+import { couponRepository } from "@/features/billing/repositories/coupon.repo";
 import type { BillingCheckoutInput, BillingCheckoutSession, BillingProvider, BillingVerificationInput, BillingVerificationResult, BillingWebhookInput, BillingWebhookResult } from "@/features/billing/billing.types";
 import { billingWebhookEventRepository } from "@/features/billing/webhookEventDataApi";
 import { subscriptionTransactionRepository } from "@/features/billing/subscriptionTransactionDataApi";
@@ -48,6 +50,10 @@ const toSession = (input: BillingCheckoutInput, session: { id: string; url?: str
     amount: input.amount,
     taxes: input.taxes,
     totalAmount: input.totalAmount,
+    couponCode: input.couponCode ?? null,
+    couponOriginalAmount: input.couponOriginalAmount ?? null,
+    couponDiscount: input.couponDiscount ?? null,
+    couponFinalAmount: input.couponFinalAmount ?? null,
     checkoutSessionId: session.id,
     checkoutUrl: session.url ?? null,
     clientSecret: session.client_secret ?? null,
@@ -74,6 +80,11 @@ export const stripeProvider: BillingProvider = {
             planType: input.planType,
             interval: input.interval,
             invoiceId: input.invoiceId,
+            couponCode: input.couponCode,
+            couponDiscount: input.couponDiscount,
+            couponFinalAmount: input.couponFinalAmount,
+            couponOriginalAmount: input.couponOriginalAmount,
+            userId: input.userId,
         });
 
         return toSession(input, session);
@@ -92,6 +103,11 @@ export const stripeProvider: BillingProvider = {
                 planType: input.planType,
                 interval: input.interval,
                 invoiceId: input.invoiceId,
+                couponCode: input.couponCode,
+                couponDiscount: input.couponDiscount,
+                couponFinalAmount: input.couponFinalAmount,
+                couponOriginalAmount: input.couponOriginalAmount,
+                userId: input.userId,
             });
 
             return toSession(input, session);
@@ -196,8 +212,18 @@ export const stripeProvider: BillingProvider = {
 
         if (event === "checkout.session.completed" || event === "invoice.paid") {
             const invoiceId = object?.metadata?.invoiceId;
+            const couponCode = object?.metadata?.couponCode;
+            const couponUserId = object?.metadata?.userId;
+
             if (invoiceId) {
                 await billingRepository.markInvoicePaidById(invoiceId).catch(() => undefined);
+            }
+
+            if (couponCode) {
+                const coupon = await couponRepository.findByCode(couponCode);
+                if (coupon) {
+                    await couponService.recordUsageForCoupon(coupon.id, couponUserId ?? null, providerPaymentId ?? object?.id ?? null);
+                }
             }
 
             const updated = await subscriptionRepository.updateByInstituteId(instituteId, {

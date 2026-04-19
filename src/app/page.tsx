@@ -6,6 +6,7 @@ import { instituteService } from "@/features/institute/instituteApi";
 import LandingPage from "@/features/marketing/components/LandingPage";
 import DashboardHome from "@/features/dashboard/components/DashboardHome";
 import DashboardLayout from "@/components/layout/dashboard/DashboardLayout";
+import { DashboardLayoutWithProviders } from "@/providers/DashboardLayoutWithProviders";
 import InstitutePublicView from "@/features/institute/components/InstitutePublicView";
 
 // Cache the root page (GitHub style: fast for all users)
@@ -77,14 +78,23 @@ export default async function Page() {
         return <LandingPage />;
     }
 
-    // Authenticated user on marketing domain → redirect to portal subdomain
+    // Authenticated user on marketing domain → redirect to portal subdomain.
+    // In local development the portal host is the same origin, so render the dashboard directly
+    // instead of redirecting to the current page and causing a loop.
     const portalDomain = hostname.includes("localhost")
         ? "localhost:3000"
         : `portal.${hostname.replace("www.", "")}`;
 
-    // Avoid forcing HTTPS for local development (localhost). Use HTTP locally
     if (hostname.includes("localhost")) {
-        redirect(`http://${portalDomain}`);
+        if (!session.isOnboarded) {
+            redirect("/onboarding");
+        }
+
+        return (
+            <DashboardLayoutWithProviders showFirstLoginShowcase={false}>
+                <DashboardHome />
+            </DashboardLayoutWithProviders>
+        );
     }
 
     redirect(`https://${portalDomain}`);

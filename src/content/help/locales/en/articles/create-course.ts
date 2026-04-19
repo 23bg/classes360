@@ -20,7 +20,7 @@ export const createCourseArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/create-course/step-1.webp",
+                    src: "/images/add-coures-form.png",
                     alt: "Course creation form in dashboard",
                 },
             ],
@@ -36,7 +36,7 @@ export const createCourseArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/create-course/step-2.webp",
+                    src: "/images/add-coures-form.png",
                     alt: "Batch creation form linked to course",
                 },
             ],
@@ -52,8 +52,8 @@ export const createCourseArticle: HelpArticle = {
             ],
             screenshots: [
                 {
-                    src: "/help/images/create-course/step-3.webp",
-                    alt: "Student assigned to course and batch",
+                    src: "/images/empty-student-list.png",
+                    alt: "Student list empty state with course and batch assignment",
                 },
             ],
         },

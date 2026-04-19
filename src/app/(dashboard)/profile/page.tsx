@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { InputGroup, InputGroupAddon, InputGroupText, InputGroupTextarea } from "@/components/ui/input-group";
 import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
 import { fetchInstituteProfile, saveInstituteProfile } from "@/features/dashboard/dashboardSlice";
@@ -93,16 +93,18 @@ export default function DashboardProfilePage() {
         void dispatch(fetchInstituteProfile());
     }, [dispatch]);
 
+    const form = useForm<ProfileFormValues>({
+        resolver: zodResolver(instituteProfileSchema),
+        mode: "onBlur",
+        defaultValues,
+    });
+
     const {
         control,
         handleSubmit,
         reset,
         formState: { isSubmitting },
-    } = useForm<ProfileFormValues>({
-        resolver: zodResolver(instituteProfileSchema),
-        mode: "onBlur",
-        defaultValues,
-    });
+    } = form;
 
     useEffect(() => {
         if (profile) {
@@ -163,144 +165,145 @@ export default function DashboardProfilePage() {
             <h1 className=" text-2xl font-semibold">Institute Profile</h1>
             <p className="mt-1 text-muted-foreground">Update your institute details. Changes are visible on your public page.</p>
 
-            <form className="mt-6 space-y-6" onSubmit={handleSubmit(save)}>
-                <Card>
+            <Form {...form}>
+                <form className="mt-6 space-y-6" onSubmit={handleSubmit(save)}>
+                    <Card>
                     <CardHeader>
                         <CardTitle>Basic Info</CardTitle>
                         <CardDescription>Institute name, contact, and location.</CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 md:grid-cols-2">
-                        <Field>
-                            <FieldLabel>Institute Name</FieldLabel>
-                            <Controller name="name" control={control} render={({ field, fieldState }) => (
-                                <>
+                        <FormField control={control} name="name" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Institute Name</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="Institute Name" minLength={2} maxLength={80} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Slug</FieldLabel>
-                            <Controller name="slug" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="slug" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Slug</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="URL slug" minLength={2} maxLength={80} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Phone</FieldLabel>
-                            <Controller name="phone" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="phone" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="Phone" inputMode="numeric" maxLength={14} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>WhatsApp</FieldLabel>
-                            <Controller name="whatsapp" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="whatsapp" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>WhatsApp</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="WhatsApp" inputMode="numeric" maxLength={14} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Address Line 1</FieldLabel>
-                            <Controller name="addressLine1" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="addressLine1" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Address Line 1</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="Street, building, area" minLength={5} maxLength={240} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Address Line 2</FieldLabel>
-                            <Controller name="addressLine2" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="addressLine2" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Address Line 2</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="Landmark (optional)" maxLength={240} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Timings</FieldLabel>
-                            <Controller name="timings" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="timings" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Timings</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="e.g. Mon-Sat 9AM-6PM" maxLength={80} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>City</FieldLabel>
-                            <Controller name="city" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="city" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>City</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="City" minLength={2} maxLength={60} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>State</FieldLabel>
-                            <Controller name="state" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="state" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>State</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="State" minLength={2} maxLength={60} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Region</FieldLabel>
-                            <Controller name="region" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="region" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Region</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="Region (optional)" maxLength={60} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Postal Code</FieldLabel>
-                            <Controller name="postalCode" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="postalCode" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Postal Code</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="Postal / ZIP" maxLength={12} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Country</FieldLabel>
-                            <Controller name="country" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="country" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Country</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="India" maxLength={60} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Country Code</FieldLabel>
-                            <Controller name="countryCode" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="countryCode" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Country Code</FormLabel>
+                                <FormControl>
                                     <Input {...field} placeholder="IN" maxLength={8} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field className="md:col-span-2">
-                            <FieldLabel>Description</FieldLabel>
-                            <Controller name="description" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="description" render={({ field }) => (
+                            <FormItem className="md:col-span-2">
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
                                     <InputGroup>
                                         <InputGroupTextarea {...field} placeholder="Brief description of your institute" rows={4} maxLength={1024} />
                                         <InputGroupAddon>
                                             <InputGroupText>{field.value.length}/1024 characters</InputGroupText>
                                         </InputGroupAddon>
                                     </InputGroup>
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                     </CardContent>
                 </Card>
 
@@ -310,60 +313,60 @@ export default function DashboardProfilePage() {
                         <CardDescription>Add website and social media links.</CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 md:grid-cols-2">
-                        <Field>
-                            <FieldLabel>Website</FieldLabel>
-                            <Controller name="website" control={control} render={({ field, fieldState }) => (
-                                <>
+                        <FormField control={control} name="website" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Website</FormLabel>
+                                <FormControl>
                                     <Input type="url" {...field} placeholder="https://..." maxLength={2048} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Instagram</FieldLabel>
-                            <Controller name="instagram" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="instagram" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Instagram</FormLabel>
+                                <FormControl>
                                     <Input type="url" {...field} placeholder="https://instagram.com/..." maxLength={2048} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Facebook</FieldLabel>
-                            <Controller name="facebook" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="facebook" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Facebook</FormLabel>
+                                <FormControl>
                                     <Input type="url" {...field} placeholder="https://facebook.com/..." maxLength={2048} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>YouTube</FieldLabel>
-                            <Controller name="youtube" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="youtube" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>YouTube</FormLabel>
+                                <FormControl>
                                     <Input type="url" {...field} placeholder="https://youtube.com/..." maxLength={2048} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>LinkedIn</FieldLabel>
-                            <Controller name="linkedin" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="linkedin" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>LinkedIn</FormLabel>
+                                <FormControl>
                                     <Input type="url" {...field} placeholder="https://linkedin.com/..." maxLength={2048} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field className="md:col-span-2">
-                            <FieldLabel>Google Map Link</FieldLabel>
-                            <Controller name="googleMapLink" control={control} render={({ field, fieldState }) => (
-                                <>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="googleMapLink" render={({ field }) => (
+                            <FormItem className="md:col-span-2">
+                                <FormLabel>Google Map Link</FormLabel>
+                                <FormControl>
                                     <Input type="url" {...field} placeholder="https://maps.google.com/..." maxLength={2048} />
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                     </CardContent>
                 </Card>
 
@@ -373,60 +376,64 @@ export default function DashboardProfilePage() {
                         <CardDescription>Upload logo and hero image.</CardDescription>
                     </CardHeader>
                     <CardContent className="grid gap-4 md:grid-cols-2">
-                        <Field>
-                            <FieldLabel>Logo</FieldLabel>
-                            <Controller name="logo" control={control} render={({ field, fieldState }) => (
-                                <>
-                                    <div className="space-y-2">
-                                        <Input
-                                            type="file"
-                                            accept="image/jpeg,image/png,image/webp"
-                                            disabled={isSubmitting || uploadingField === "logo"}
-                                            onChange={(event) => {
-                                                const file = event.target.files?.[0];
-                                                if (!file) return;
-                                                void handleImageUpload(file, "logo", field.onChange);
-                                                event.currentTarget.value = "";
-                                            }}
-                                        />
-                                        {field.value ? (
-                                            <p className="text-xs text-muted-foreground break-all">Current: {field.value}</p>
-                                        ) : null}
-                                        {field.value ? (
-                                            <Button type="button" variant="outline" size="sm" onClick={() => field.onChange("")}>Remove</Button>
-                                        ) : null}
-                                    </div>
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
-                        <Field>
-                            <FieldLabel>Hero Image</FieldLabel>
-                            <Controller name="heroImage" control={control} render={({ field, fieldState }) => (
-                                <>
-                                    <div className="space-y-2">
-                                        <Input
-                                            type="file"
-                                            accept="image/jpeg,image/png,image/webp"
-                                            disabled={isSubmitting || uploadingField === "heroImage"}
-                                            onChange={(event) => {
-                                                const file = event.target.files?.[0];
-                                                if (!file) return;
-                                                void handleImageUpload(file, "heroImage", field.onChange);
-                                                event.currentTarget.value = "";
-                                            }}
-                                        />
-                                        {field.value ? (
-                                            <p className="text-xs text-muted-foreground break-all">Current: {field.value}</p>
-                                        ) : null}
-                                        {field.value ? (
-                                            <Button type="button" variant="outline" size="sm" onClick={() => field.onChange("")}>Remove</Button>
-                                        ) : null}
-                                    </div>
-                                    <FieldError errors={[fieldState.error]} />
-                                </>
-                            )} />
-                        </Field>
+                        <FormField control={control} name="logo" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Logo</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        name={field.name}
+                                        onBlur={field.onBlur}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        disabled={isSubmitting || uploadingField === "logo"}
+                                        onChange={(event) => {
+                                            const file = event.target.files?.[0];
+                                            if (!file) return;
+                                            void handleImageUpload(file, "logo", field.onChange);
+                                            event.currentTarget.value = "";
+                                        }}
+                                    />
+                                </FormControl>
+                                <div className="space-y-2">
+                                    {field.value ? (
+                                        <p className="text-xs text-muted-foreground break-all">Current: {field.value}</p>
+                                    ) : null}
+                                    {field.value ? (
+                                        <Button type="button" variant="outline" size="sm" onClick={() => field.onChange("")}>Remove</Button>
+                                    ) : null}
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={control} name="heroImage" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Hero Image</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        name={field.name}
+                                        onBlur={field.onBlur}
+                                        type="file"
+                                        accept="image/jpeg,image/png,image/webp"
+                                        disabled={isSubmitting || uploadingField === "heroImage"}
+                                        onChange={(event) => {
+                                            const file = event.target.files?.[0];
+                                            if (!file) return;
+                                            void handleImageUpload(file, "heroImage", field.onChange);
+                                            event.currentTarget.value = "";
+                                        }}
+                                    />
+                                </FormControl>
+                                <div className="space-y-2">
+                                    {field.value ? (
+                                        <p className="text-xs text-muted-foreground break-all">Current: {field.value}</p>
+                                    ) : null}
+                                    {field.value ? (
+                                        <Button type="button" variant="outline" size="sm" onClick={() => field.onChange("")}>Remove</Button>
+                                    ) : null}
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
                     </CardContent>
                 </Card>
 
@@ -434,6 +441,7 @@ export default function DashboardProfilePage() {
                     {isSubmitting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving...</> : "Save Profile"}
                 </Button>
             </form>
+            </Form>
         </main>
     );
 }

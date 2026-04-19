@@ -32,6 +32,7 @@ export const API = {
         REFRESH_TOKEN: '/auth/refresh',
         PASSWORD_RESET: '/auth/password-reset',
         PASSWORD_RESET_REQUEST: '/auth/password-reset/request',
+        MFA_VERIFY: '/auth/mfa/verify',
         ME: '/auth/me',
     },
     INTERNAL: {
@@ -78,6 +79,7 @@ export const API = {
         BILLING: {
             ROOT: '/billing',
             CONFIRM: '/billing/confirm',
+            APPLY_COUPON: '/billing/apply-coupon',
         },
         TEAMS: {
             ROOT: '/teams',

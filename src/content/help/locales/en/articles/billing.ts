@@ -19,6 +19,12 @@ export const billingArticle: HelpArticle = {
                 "Growth: up to 20 users, INR 3,499/month",
                 "Scale: unlimited users, INR 4,999/month",
             ],
+            screenshots: [
+                {
+                    src: "/images/billing.png",
+                    alt: "Billing page with plan selection and pricing details",
+                },
+            ],
         },
         {
             id: "step2",

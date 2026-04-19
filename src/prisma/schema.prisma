@@ -13,6 +13,13 @@ enum UserRole {
     VIEWER
 }
 
+enum UserStatus {
+    PENDING_VERIFICATION
+    VERIFIED_NO_PASSWORD
+    ACTIVE
+    BLOCKED
+}
+
 enum SubscriptionStatus {
     TRIAL
     ACTIVE
@@ -102,6 +109,7 @@ model User {
     onboardingCompleted Boolean   @default(false)
     firstLogin          Boolean   @default(true)
     role                UserRole  @default(OWNER)
+    status              UserStatus @default(PENDING_VERIFICATION)
     instituteId         String?   @db.ObjectId
     subject             String?
     bio                 String?
@@ -560,6 +568,10 @@ model BillingInvoice {
     nextRetryAt           DateTime?
     lastFailureReason     String?
     metadata              Json?
+    couponCode            String?
+    originalAmount        Float?
+    discountAmount        Float?
+    finalAmount           Float?
     createdAt             DateTime             @default(now())
     updatedAt             DateTime             @updatedAt
 
@@ -567,6 +579,42 @@ model BillingInvoice {
     @@index([instituteId, status])
     @@index([dueDate])
     @@map("billing_invoices")
+}
+
+model BillingCoupon {
+    id                     String    @id @default(auto()) @map("_id") @db.ObjectId
+    code                   String    @unique
+    type                   CouponType
+    value                  Float
+    currency               String?
+    maxDiscountAmount      Float?
+    minOrderAmount         Float?
+    usageLimit             Int?
+    usagePerUser           Int?
+    usedCount              Int       @default(0)
+    applicablePlans        String[]?
+    applicableBillingCycle String[]?
+    isActive               Boolean   @default(true)
+    startsAt               DateTime?
+    expiresAt              DateTime?
+    createdAt              DateTime  @default(now())
+    updatedAt              DateTime  @updatedAt
+    usages                 BillingCouponUsage[]
+
+    @@map("billing_coupons")
+}
+
+model BillingCouponUsage {
+    id          String        @id @default(auto()) @map("_id") @db.ObjectId
+    couponId    String        @db.ObjectId
+    userId      String?       @db.ObjectId
+    usedAt      DateTime      @default(now())
+    orderId     String?
+    coupon      BillingCoupon @relation(fields: [couponId], references: [id])
+
+    @@index([couponId])
+    @@index([userId])
+    @@map("billing_coupon_usages")
 }
 
 model SubscriptionTransaction {

@@ -6,8 +6,10 @@ export interface LoginPayload {
 }
 
 export interface SignupPayload {
+    name: string;
     email: string;
-    password: string;
+    phoneNumber: string;
+    password?: string;
 }
 
 export interface VerifyOtpPayload {
@@ -32,6 +34,7 @@ export interface AuthResponse {
     message?: string;
     mfaRequired?: boolean;
     requiresEmailVerification?: boolean;
+    status?: "PENDING_VERIFICATION" | "VERIFIED_NO_PASSWORD" | "ACTIVE";
 }
 
 export interface OtpResponse {

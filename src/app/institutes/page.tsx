@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const metadata: Metadata = {
     title: "Coaching Institutes Near You",
@@ -135,11 +136,21 @@ export default async function InstitutesPage({ searchParams }: InstitutesPagePro
                         <Input placeholder="City" name="city" defaultValue={city} />
                         <Input placeholder="Course" name="course" defaultValue={course} />
                         <Input placeholder="Search institute" name="q" defaultValue={q} />
-                        <div className="flex gap-2">
-                            <select name="sort" defaultValue={sort} className="h-9 w-full rounded-md border bg-background px-3 text-sm">
-                                <option value="popular">Popular</option>
-                                <option value="newest">Newest</option>
-                            </select>
+                        <div className="flex gap-2 items-end">
+                            <div className="w-full">
+                                <label htmlFor="sort" className="sr-only">
+                                    Sort
+                                </label>
+                                <Select name="sort" defaultValue={sort}>
+                                    <SelectTrigger id="sort" className="w-full">
+                                        <SelectValue placeholder="Sort" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="popular">Popular</SelectItem>
+                                        <SelectItem value="newest">Newest</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                             <Button type="submit">Apply</Button>
                         </div>
                     </form>

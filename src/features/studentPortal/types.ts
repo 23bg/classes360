@@ -8,6 +8,17 @@ export type PortalData = {
             name?: string | null;
             logo?: string | null;
             logoUrl?: string | null;
+            description?: string | null;
+            address?: string | null;
+            phone?: string | null;
+            email?: string | null;
+            website?: string | null;
+            whatsapp?: string | null;
+            supportPhone?: string | null;
+            supportEmail?: string | null;
+            officeAddress?: string | null;
+            services?: string[] | null;
+            teachers?: Array<{ photo?: string | null; name?: string | null; subject?: string | null; experience?: string | null; bio?: string | null }> | null;
         } | null;
         course?: { name: string; duration?: string | null; description?: string | null } | null;
         batch?: {
@@ -30,6 +41,7 @@ export type PortalData = {
         studyMaterialLink?: string | null;
     };
     announcements?: Array<{ title: string; body: string; createdAt: string }>;
+    teachers?: Array<{ photo?: string | null; name?: string | null; subject?: string | null; experience?: string | null; bio?: string | null }>;
 };
 
 export type StudentPortalState = {

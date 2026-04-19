@@ -95,8 +95,8 @@
 
 "use client";
 
-import { useAuth } from "../hooks/useAuth";
-import { Controller, useForm } from "react-hook-form";
+import { useLogin } from "../hooks/useAuthQuery";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginFormSchema } from "../validations/login.validation";
 import { loginFormData } from "../validations/login.validation";
@@ -116,11 +116,11 @@ import {
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 
 export default function LoginForm() {
     const router = useRouter();
-    const { login, loading } = useAuth();
+    const loginMutation = useLogin();
 
     const form = useForm<loginFormData>({
         resolver: zodResolver(loginFormSchema),
@@ -129,28 +129,33 @@ export default function LoginForm() {
     });
 
     const onSubmit = async (data: loginFormData) => {
-        login(
-            { email: data.email, password: data.password },
+        try {
+            const result = await loginMutation.mutateAsync({ email: data.email, password: data.password });
 
-            {
-                onSuccess: (result: { mfaRequired?: boolean; redirectTo?: string }) => {
-                    if (result?.mfaRequired) {
-                        localStorage.setItem("mfa_email", data.email);
-                        toast.info("MFA verification required.");
-                        router.push(ROUTES.AUTH.VERIFICATION);
-                        return;
-                    }
-
-                    toast.success("Login successful.");
-                    router.push(result?.redirectTo || "/overview");
-                    form.reset();
-                },
-
-                onError: (err: any) => {
-                    toast.error(typeof err === 'string' ? err : err?.message || "Login failed");
-                },
+            if (result?.mfaRequired) {
+                toast.info("MFA verification required.");
+                router.push(`${ROUTES.AUTH.VERIFICATION}?mode=mfa&email=${encodeURIComponent(data.email)}`);
+                return;
             }
-        );
+
+            if (result?.redirectTo === "/verification") {
+                toast.info(result.message || "Please verify your email before continuing.");
+                router.push(`${ROUTES.AUTH.VERIFICATION}?mode=verify&email=${encodeURIComponent(data.email)}`);
+                return;
+            }
+
+            if (result?.redirectTo?.startsWith("/forgot-password")) {
+                toast.info(result.message || "You haven’t set your password yet. Please create one.");
+                router.push(result.redirectTo);
+                return;
+            }
+
+            toast.success("Login successful.");
+            router.push(result?.redirectTo || "/overview");
+            form.reset();
+        } catch (err: any) {
+            toast.error(typeof err === "string" ? err : err?.message || "Login failed");
+        }
     };
 
     return (
@@ -163,63 +168,73 @@ export default function LoginForm() {
             </CardHeader>
 
             <CardContent>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                    <FieldGroup>
-                        <Field>
-                            <FieldLabel>Email</FieldLabel>
-                            <Controller
-                                name="email"
-                                control={form.control}
-                                render={({ field, fieldState }) => (
-                                    <>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
                                         <Input
                                             type="email"
                                             {...field}
                                             placeholder="name@example.com"
-                                            disabled={loading}
+                                            disabled={loginMutation.isPending}
                                             maxLength={120}
                                         />
-                                        <FieldError errors={[fieldState.error]} />
-                                    </>
-                                )}
-                            />
-                        </Field>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                        <Field>
-                            <FieldLabel>Password</FieldLabel>
-                            <Controller
-                                name="password"
-                                control={form.control}
-                                render={({ field, fieldState }) => (
-                                    <>
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Password</FormLabel>
+                                    <FormControl>
                                         <Input
                                             type="password"
                                             {...field}
                                             placeholder="Enter your password"
-                                            disabled={loading}
+                                            disabled={loginMutation.isPending}
                                             maxLength={128}
                                         />
-                                        <FieldError errors={[fieldState.error]} />
-                                    </>
-                                )}
-                            />
-                        </Field>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
-                        <Button type="submit" className="w-full" disabled={loading || form.formState.isSubmitting}>
-                            {loading || form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+                        <Button type="submit" className="w-full" disabled={loginMutation.isPending || form.formState.isSubmitting}>
+                            {loginMutation.isPending || form.formState.isSubmitting ? "Signing in..." : "Sign in"}
                         </Button>
 
-                        <p className="text-center text-sm text-muted-foreground">
-                            Don't have an account?{" "}
-                            <Link
-                                href={ROUTES.AUTH.SIGN_UP}
-                                className="text-primary hover:underline font-medium"
-                            >
-                                Sign up
-                            </Link>
-                        </p>
-                    </FieldGroup>
-                </form>
+                        <div className="space-y-2 text-center text-sm text-muted-foreground">
+                            <p>
+                                Don't have an account?{" "}
+                                <Link
+                                    href={ROUTES.AUTH.SIGN_UP}
+                                    className="text-primary hover:underline font-medium"
+                                >
+                                    Sign up
+                                </Link>
+                            </p>
+                            <p>
+                                <Link
+                                    href={`${ROUTES.AUTH.FORGOT_PASSWORD}?mode=reset`}
+                                    className="text-primary hover:underline font-medium"
+                                >
+                                    Forgot password?
+                                </Link>
+                            </p>
+                        </div>
+                    </form>
+                </Form>
             </CardContent>
         </Card>
     );

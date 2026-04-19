@@ -490,7 +490,7 @@ export default function StudentsPage() {
                             <p className="text-sm text-muted-foreground">
                                 {uploadFileName ? uploadFileName : "Click to select a CSV file"}
                             </p>
-                            <input
+                            <Input
                                 ref={fileInputRef}
                                 type="file"
                                 accept=".csv"

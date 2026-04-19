@@ -2,6 +2,8 @@ import { env } from "@/lib/config/env";
 import { assertRazorpayReady, razorpay, verifyRazorpayCheckoutSignature, verifyRazorpayWebhookSignature } from "@/lib/billing/razorpay";
 import { AppError } from "@/lib/utils/error";
 import { detectBillingRegion, getRegionLabel } from "@/features/billing/billingRouting";
+import { couponService } from "@/features/billing/services/coupon.service";
+import { couponRepository } from "@/features/billing/repositories/coupon.repo";
 import type { BillingCheckoutInput, BillingCheckoutSession, BillingProvider, BillingVerificationInput, BillingVerificationResult, BillingWebhookInput, BillingWebhookResult } from "@/features/billing/billing.types";
 import { billingWebhookEventRepository } from "@/features/billing/webhookEventDataApi";
 import { subscriptionTransactionRepository } from "@/features/billing/subscriptionTransactionDataApi";
@@ -48,6 +50,10 @@ const normalizeSession = (input: BillingCheckoutInput, providerSubscriptionId: s
     amount: input.amount,
     taxes: input.taxes,
     totalAmount: input.totalAmount,
+    couponCode: input.couponCode ?? null,
+    couponOriginalAmount: input.couponOriginalAmount ?? null,
+    couponDiscount: input.couponDiscount ?? null,
+    couponFinalAmount: input.couponFinalAmount ?? null,
     providerSubscriptionId,
     checkoutUrl: checkoutUrl ?? null,
     publishableKey: env.RAZORPAY_KEY_ID ?? null,
@@ -63,17 +69,29 @@ export const razorpayProvider: BillingProvider = {
         assertRazorpayReady();
         const planId = getRazorpayPlanId(input.planType, input.interval);
 
+        const notes: Record<string, string> = {
+            instituteId: input.instituteId,
+            planType: input.planType,
+            interval: input.interval,
+            invoiceId: input.invoiceId ?? "",
+        };
+
+        if (input.couponCode) {
+            notes.couponCode = input.couponCode;
+        }
+        if (input.couponDiscount != null) {
+            notes.discountAmount = String(input.couponDiscount);
+        }
+        if (input.couponFinalAmount != null) {
+            notes.finalAmount = String(input.couponFinalAmount);
+        }
+
         const created = await razorpay!.subscriptions.create({
             plan_id: planId,
             quantity: 1,
             total_count: 12,
             customer_notify: 1,
-            notes: {
-                instituteId: input.instituteId,
-                planType: input.planType,
-                interval: input.interval,
-                invoiceId: input.invoiceId ?? "",
-            },
+            notes,
         });
 
         return normalizeSession(input, created.id, null);
@@ -169,8 +187,19 @@ export const razorpayProvider: BillingProvider = {
 
         if (event === "payment_link.paid" && providerPaymentLinkId) {
             const invoiceId = payload.payload?.payment_link?.entity?.notes?.invoiceId;
+            const couponCode = payload.payload?.payment_link?.entity?.notes?.couponCode;
+            const couponUserId = payload.payload?.payment_link?.entity?.notes?.userId;
+
             if (invoiceId) {
                 await billingRepository.markInvoicePaidById(invoiceId).catch(() => undefined);
+
+                if (couponCode) {
+                    const coupon = await couponRepository.findByCode(couponCode);
+                    if (coupon) {
+                        await couponService.recordUsageForCoupon(coupon.id, couponUserId ?? null, providerPaymentLinkId);
+                    }
+                }
+
                 const transaction = await subscriptionTransactionRepository.create({
                     instituteId: instituteId ?? "",
                     provider: "RAZORPAY",

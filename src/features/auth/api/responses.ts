@@ -3,9 +3,14 @@ export type ApiSuccess<T> = {
     data: T;
 };
 
+export type ApiErrorPayload = {
+    message: string;
+    code?: string;
+};
+
 export type ApiFailure = {
     success: false;
-    error: string;
+    error: ApiErrorPayload;
 };
 
 export const ok = <T>(data: T): ApiSuccess<T> => ({
@@ -13,7 +18,7 @@ export const ok = <T>(data: T): ApiSuccess<T> => ({
     data,
 });
 
-export const fail = (error: string): ApiFailure => ({
+export const fail = (error: string | ApiErrorPayload): ApiFailure => ({
     success: false,
-    error,
+    error: typeof error === "string" ? { message: error } : error,
 });

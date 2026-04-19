@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { HelpDoc } from "@/content/help/docs";
 import { Input } from "@/components/ui/input";
 
@@ -10,6 +11,7 @@ type HelpSearchProps = {
 };
 
 export default function HelpSearch({ docs }: HelpSearchProps) {
+    const t = useTranslations("help");
     const [query, setQuery] = useState("");
 
     const filtered = useMemo(() => {
@@ -35,19 +37,19 @@ export default function HelpSearch({ docs }: HelpSearchProps) {
     return (
         <div className="rounded-xl border bg-card p-4">
             <label htmlFor="help-search" className="mb-2 block text-sm font-medium">
-                Search Help Articles
+                {t("searchLabel")}
             </label>
             <Input
                 id="help-search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search by title or topic"
+                placeholder={t("searchPlaceholder")}
                 autoComplete="off"
             />
 
             <div className="mt-4 space-y-2">
                 {filtered.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No guides matched your search.</p>
+                    <p className="text-sm text-muted-foreground">{t("noGuidesFound")}</p>
                 ) : (
                     filtered.map((doc) => (
                         <Link

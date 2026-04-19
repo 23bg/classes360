@@ -7,13 +7,12 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useAppDispatch, useAppSelector } from "@/hooks/reduxHooks";
-import { studentPortalLogin } from "@/features/studentPortal/studentPortalSlice";
+import { useStudentPortalLogin } from "@/features/studentPortal/api";
 
 export default function StudentLoginPage() {
     const router = useRouter();
-    const dispatch = useAppDispatch();
-    const submitting = useAppSelector((state) => state.studentPortal.authLoading);
+    const loginMutation = useStudentPortalLogin();
+    const submitting = loginMutation.isPending;
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
 
@@ -24,11 +23,11 @@ export default function StudentLoginPage() {
         }
 
         try {
-            await dispatch(studentPortalLogin({ identifier, password })).unwrap();
+            await loginMutation.mutateAsync({ identifier, password });
             router.push("/student");
             router.refresh();
         } catch (error: any) {
-            toast.error(error?.data?.error?.message ?? "Login failed");
+            toast.error(typeof error === "string" ? error : error?.message ?? "Login failed");
         }
     };
 
